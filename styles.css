@@ -1,7 +1,3 @@
-/* Hallmark · macrostructure: Long Document · tone: plain-technical · anchor hue: warm */
-/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4 */
-/* Hallmark · genre: editorial · macrostructure: Long Document · theme: Newsprint · enrichment: none · nav: N6 · footer: Ft1 */
-
 /* ==========================================================================
    Reset — minimal, print-aware
    ========================================================================== */
@@ -224,7 +220,7 @@ main {
   margin: 0 0 var(--space-lg);
 }
 
-/* Elsewhere — a real list; separation via hairline, not generated glyphs */
+/* Elsewhere — plain list, hairline separation */
 
 .elsewhere {
   display: flex;
