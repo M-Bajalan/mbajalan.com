@@ -1,0 +1,371 @@
+/* Hallmark · macrostructure: Long Document · tone: plain-technical · anchor hue: warm */
+/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4 */
+/* Hallmark · genre: editorial · macrostructure: Long Document · theme: Newsprint · enrichment: none · nav: N6 · footer: Ft1 */
+
+/* ==========================================================================
+   Reset — minimal, print-aware
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+  min-width: 0;
+  margin: 0;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-selection);
+  color: var(--color-ink-2);
+}
+
+/* ==========================================================================
+   Skip link
+   ========================================================================== */
+
+.skip-link {
+  position: absolute;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  transform: translateY(-200%);
+  background: var(--color-ink-2);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  padding: var(--space-xs) var(--space-md);
+  z-index: var(--z-toast);
+  white-space: nowrap;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   Focus — instant ring, never animated, >=3:1 against paper
+   ========================================================================== */
+
+a:focus-visible,
+.skip-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Links — typographic, no button chrome
+   ========================================================================== */
+
+a {
+  color: var(--color-accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+a:hover,
+a:active {
+  color: var(--color-accent-2);
+}
+
+/* ==========================================================================
+   N6 · Newspaper masthead
+   ========================================================================== */
+
+.nav-mast {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) var(--page-gutter) 0;
+  text-align: center;
+}
+
+.mast-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: normal;
+  font-size: var(--text-mast);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  color: var(--color-ink-2);
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.mast-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  gap: var(--space-md) var(--space-lg);
+  margin: 0;
+  padding: 0;
+}
+
+.mast-nav a {
+  font-size: var(--text-sm);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--color-muted);
+}
+
+.mast-nav a:hover,
+.mast-nav a:focus-visible {
+  color: var(--color-accent);
+}
+
+.mast-rule {
+  width: 100%;
+  max-width: 48rem;
+  height: var(--space-2xs);
+  margin: var(--space-lg) auto 0;
+  border: 0;
+  border-top: var(--rule-hair) solid var(--color-rule-strong);
+  border-bottom: var(--rule-hair) solid var(--color-rule-strong);
+}
+
+/* ==========================================================================
+   Long Document — continuous prose
+   ========================================================================== */
+
+main {
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--page-gutter);
+}
+
+.prose {
+  width: 100%;
+  max-width: var(--measure);
+  padding-block: var(--space-2xl) var(--space-3xl);
+}
+
+.prose > p {
+  margin: 0 0 var(--space-lg);
+  max-width: var(--measure);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+}
+
+.lede {
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  color: var(--color-ink-2);
+  font-weight: 400;
+  margin-bottom: var(--space-2xl);
+}
+
+.prose h2.inline {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 600;
+  font-size: var(--text-lg);
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-2);
+  margin: var(--space-2xl) 0 var(--space-md);
+  padding-bottom: var(--space-2xs);
+  border-bottom: var(--rule-hair) solid var(--color-accent);
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.prose h2.inline:first-of-type {
+  margin-top: var(--space-3xl);
+}
+
+.meta {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  letter-spacing: 0.01em;
+  color: var(--color-neutral);
+  margin: 0 0 var(--space-md);
+}
+
+.links {
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-lg);
+}
+
+/* Elsewhere — a real list; separation via hairline, not generated glyphs */
+
+.elsewhere {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.elsewhere li {
+  margin: 0;
+}
+
+.elsewhere li:not(:first-child) {
+  border-inline-start: var(--rule-hair) solid var(--color-rule);
+  padding-inline-start: var(--space-lg);
+}
+
+.elsewhere a {
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Ft1 · Mast-headed footer (reduced — domain + year only)
+   ========================================================================== */
+
+.foot-mast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-lg);
+  padding: var(--space-lg) var(--page-gutter) var(--space-2xl);
+  margin-top: var(--space-2xl);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  background: var(--color-paper-2);
+  max-width: 100%;
+}
+
+.foot-domain,
+.foot-year {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-neutral);
+  white-space: nowrap;
+}
+
+.foot-domain {
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================================================
+   Responsive — verified at 320 / 375 / 414 / 768
+   ========================================================================== */
+
+@media (max-width: 26.5625rem) {
+  /* <= 425px: tighten the masthead rhythm on small phones */
+  .nav-mast {
+    padding-top: var(--space-xl);
+  }
+
+  .prose {
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+}
+
+@media (min-width: 48rem) {
+  .prose > p,
+  .lede {
+    font-size: var(--text-md);
+  }
+
+  .mast-nav a {
+    font-size: var(--text-base);
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* ==========================================================================
+   Print — one clean page
+   ========================================================================== */
+
+@media print {
+  .skip-link {
+    display: none;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .nav-mast {
+    padding-top: 0;
+  }
+
+  .mast-nav {
+    display: none;
+  }
+
+  .mast-rule {
+    border-color: var(--color-ink);
+  }
+
+  a {
+    color: var(--color-ink);
+    text-decoration: underline;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: var(--color-neutral);
+  }
+
+  .prose {
+    max-width: 100%;
+    padding-block: var(--space-lg) var(--space-md);
+  }
+
+  .foot-mast {
+    background: transparent;
+    border-top: var(--rule-hair) solid var(--color-ink);
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}

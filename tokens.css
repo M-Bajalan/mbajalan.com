@@ -1,0 +1,87 @@
+/* Hallmark · tokens: Newsprint · genre: editorial · macrostructure: Long Document */
+
+:root {
+  /* === Colour — Newsprint: warm paper, roman ink, warm accent === */
+  /* Paper band: light (L > 85%) · Display style: roman-serif · Accent hue: warm (H ~30) */
+  --color-paper:      oklch(97%   0.011 75);   /* warm cream newsprint paper */
+  --color-paper-2:     oklch(94%  0.013 75);   /* slightly deeper paper, footer band */
+  --color-rule:        oklch(80%  0.015 70);   /* hairline rule */
+  --color-rule-strong: oklch(70%  0.018 65);   /* double rule under masthead */
+  --color-neutral:     oklch(45%  0.014 65);   /* meta / muted text — safe margin over 4.5:1 */
+  --color-muted:       oklch(40%  0.013 60);   /* deeper muted text (nav links) */
+  --color-ink:         oklch(21%  0.014 55);   /* body ink, warm near-black */
+  --color-ink-2:       oklch(15%  0.012 50);   /* masthead / heading ink */
+  --color-accent:      oklch(37%  0.145 32);   /* warm rust — links, focus, marks */
+  --color-accent-2:    oklch(30%  0.130 30);   /* accent hover / active */
+  --color-focus:       oklch(37%  0.145 32);   /* focus ring — same as accent, >=3:1 on paper */
+  --color-selection:   oklch(88%  0.040 45);   /* text selection background */
+
+  /* === Typography === */
+  /* Long Document collapses to one considered serif family (display + body);
+     a monospace outlier tags colophon / meta lines only (2 slot-role). */
+  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --font-body:    "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --font-outlier: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --text-xs:   0.75rem;    /* 12px  */
+  --text-sm:   0.875rem;   /* 14px  */
+  --text-base: 1rem;       /* 16px  */
+  --text-md:   1.25rem;    /* 20px  */
+  --text-lg:   1.5625rem;  /* 25px  */
+  --text-xl:   1.9531rem;  /* 31.25px */
+  --text-2xl:  2.4414rem;  /* 39px  */
+  --text-mast: clamp(2.25rem, 5vw + 1rem, 3.625rem); /* masthead name */
+
+  --leading-tight: 1.15;
+  --leading-snug:  1.35;
+  --leading-body:  1.68;
+
+  /* === Spacing — 4pt scale === */
+  --space-3xs: 0.125rem;  /*  2px */
+  --space-2xs: 0.25rem;   /*  4px */
+  --space-xs:  0.5rem;    /*  8px */
+  --space-sm:  0.75rem;   /* 12px */
+  --space-md:  1rem;      /* 16px */
+  --space-lg:  1.5rem;    /* 24px */
+  --space-xl:  2.5rem;    /* 40px */
+  --space-2xl: 4rem;      /* 64px */
+  --space-3xl: 6rem;      /* 96px */
+  --space-4xl: 9rem;      /* 144px */
+
+  /* === Measure / page === */
+  --measure: 65ch;
+  --page-gutter: clamp(1.25rem, 5vw, 3rem);
+
+  /* === Rules === */
+  --rule-hair: 1px;
+  --rule-thick: 2px;
+
+  /* === Radius (kept minimal — print metaphor, square by default) === */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;
+
+  /* === Motion — Newsprint reads as static print; one subtle link-colour
+     shift is the entire motion budget, and it collapses to 0 under
+     prefers-reduced-motion. === */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-short: 120ms;
+  --dur-med:   180ms;
+
+  /* === Z-index scale === */
+  --z-base:     1;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-tooltip:  600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-short: 0ms;
+    --dur-med:   0ms;
+  }
+}
