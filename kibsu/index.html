@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kibsu — Mohammed Bajalan</title>
+<meta name="description" content="Kibsu reads your coding-agent instructions and reports which of them can actually be verified. Open source, no dependencies, MIT.">
+<link rel="canonical" href="https://mbajalan.com/kibsu/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<meta property="og:title" content="kibsu">
+<meta property="og:description" content="Reads your coding-agent instructions and reports which of them can actually be verified.">
+<meta property="og:url" content="https://mbajalan.com/kibsu/">
+<meta property="og:type" content="website">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kibsu">
+<meta name="twitter:description" content="Reads your coding-agent instructions and reports which of them can actually be verified.">
+
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kibsu",
+  "url": "https://mbajalan.com/kibsu/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows",
+  "license": "https://opensource.org/licenses/MIT",
+  "codeRepository": "https://github.com/M-Bajalan/kibsu",
+  "downloadUrl": "https://pypi.org/project/kibsu/",
+  "programmingLanguage": "Python",
+  "description": "Reads your coding-agent instructions and reports which of them can actually be verified.",
+  "author": {
+    "@type": "Person",
+    "name": "Mohammed Bajalan",
+    "url": "https://mbajalan.com"
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="nav-mast">
+  <p class="mast-name"><a href="/">Mohammed Bajalan</a></p>
+  <nav class="mast-nav" aria-label="Primary">
+    <ul>
+      <li><a href="/#work">Work</a></li>
+      <li><a href="/#writing">Writing</a></li>
+      <li><a href="/#elsewhere">Elsewhere</a></li>
+    </ul>
+  </nav>
+  <hr class="mast-rule" aria-hidden="true">
+</header>
+
+<main id="main">
+  <article class="prose">
+    <h1 class="page-title">kibsu</h1>
+    <p class="lede">What can your agents not do in this repository yet?</p>
+
+    <p>You have written instructions for coding agents, an AGENTS.md, a CLAUDE.md, a skills directory, a .cursorrules file. Kibsu reads them alongside your git history and reports which of those instructions anyone could actually verify were followed, and which ones only work when a human remembers.</p>
+
+    <h2 class="inline" id="run">Run it</h2>
+    <pre class="cmd">python -m kibsu report /path/to/any/repo</pre>
+    <p class="meta">Python 3.8 and up. No dependencies. MIT.</p>
+
+    <h2 class="inline" id="output">What it prints</h2>
+    <pre class="output">  WHAT YOUR AGENTS CANNOT DO HERE YET
+  /tmp/superpowers
+  --------------------------------------------------------------------------
+  x  Find your docs             89 markdown files, no index. An agent must grep the tree.
+  +  Know your conventions      consistent frontmatter (description, name) - enforceable.
+  +  Prove they followed        15.6% of your procedural instructions are verifiable (above the 9.4% public median).
+  x  Resume after a break       1 of 1 artifacts your instructions promise have never existed in any commit.
+  ?  Follow your own rules      COULD NOT CHECK - no index file to check history against (looked for docs/index.json, .kibsu/index.json, docs/index.json).
+  --------------------------------------------------------------------------
+  2 of 5 ready.  1 could NOT be checked - that is not a pass.
+  Nothing was written to this repo - run `git status` to confirm.</pre>
+    <p class="meta">Real output, against a public repository at commit 3dcbd5c. Re-run with scorer 0.6.0 on 2026-08-07 before being pasted.</p>
+
+    <h2 class="inline" id="writes">What it writes</h2>
+    <p>The read-only commands write nothing. Run one, then run git status. Four commands write on purpose and say so before they do: index writes the index file, install and gate --install vendor tools and wire hooks, both reversible, and check --receipt writes a receipt. Everything else reads only.</p>
+
+    <h2 class="inline" id="links">Links</h2>
+    <ul class="elsewhere">
+      <li><a href="https://github.com/M-Bajalan/kibsu">Source</a></li>
+      <li><a href="https://pypi.org/project/kibsu/">PyPI</a></li>
+      <li><a href="https://dev.to/mbajalan/your-agents-instructions-are-promises-nobody-checks-i-counted-22in">The article</a></li>
+    </ul>
+  </article>
+</main>
+
+<footer class="foot-mast">
+  <p class="foot-domain">mbajalan.com</p>
+  <p class="foot-year">2026</p>
+</footer>
+</body>
+</html>

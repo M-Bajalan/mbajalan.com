@@ -245,6 +245,88 @@ main {
   white-space: nowrap;
 }
 
+/* Masthead name as a link (inner pages return home through it) */
+
+.mast-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mast-name a:hover {
+  color: var(--color-accent);
+}
+
+/* Page title — inner pages, where the masthead name is no longer the h1 */
+
+.page-title {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 600;
+  font-size: var(--text-title);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  color: var(--color-ink-2);
+  margin: 0 0 var(--space-sm);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* Work — the products list. One entry today, built to take more. */
+
+.work {
+  list-style: none;
+  margin: 0 0 var(--space-lg);
+  padding: 0;
+}
+
+.work > li {
+  margin: 0 0 var(--space-lg);
+  padding-inline-start: var(--space-md);
+  border-inline-start: var(--rule-hair) solid var(--color-rule);
+}
+
+.work-name {
+  font-size: var(--text-base);
+  margin: 0 0 var(--space-2xs);
+}
+
+.work-note {
+  display: block;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  max-width: var(--measure);
+}
+
+/* Terminal blocks — real output, no fake window chrome.
+   The block scrolls inside itself so the page never scrolls sideways. */
+
+pre.cmd,
+pre.output {
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  border-inline-start: var(--rule-hair) solid var(--color-accent);
+  margin: 0 0 var(--space-sm);
+  padding: var(--space-md);
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  tab-size: 2;
+}
+
+pre.cmd {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+pre.output {
+  white-space: pre;
+}
+
 /* ==========================================================================
    Ft1 · Mast-headed footer (reduced — domain + year only)
    ========================================================================== */
@@ -287,6 +369,12 @@ main {
 
   .prose {
     padding-block: var(--space-xl) var(--space-2xl);
+  }
+
+  /* keep the output block readable without letting it widen the page */
+  pre.cmd,
+  pre.output {
+    padding: var(--space-sm);
   }
 }
 
@@ -354,6 +442,20 @@ main {
   .prose {
     max-width: 100%;
     padding-block: var(--space-lg) var(--space-md);
+  }
+
+  pre.cmd,
+  pre.output {
+    background: transparent;
+    border-inline-start: var(--rule-hair) solid var(--color-ink);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 8pt;
+  }
+
+  /* the URL-after-link rule would wreck the output block */
+  pre a[href^="http"]::after {
+    content: "";
   }
 
   .foot-mast {

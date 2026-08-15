@@ -29,6 +29,7 @@
   --text-xl:   1.9531rem;  /* 31.25px */
   --text-2xl:  2.4414rem;  /* 39px  */
   --text-mast: clamp(2.25rem, 5vw + 1rem, 3.625rem); /* masthead name */
+  --text-title: clamp(1.9531rem, 3vw + 1rem, 2.4414rem); /* inner-page headline, sits below the masthead */
 
   --leading-tight: 1.15;
   --leading-snug:  1.35;
