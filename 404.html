@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Page not found — mbajalan.com</title>
+<!-- Deliberately self-contained: a 404 has to render even if the site
+     stylesheet is the thing that failed. Colours are inlined rather than
+     tokenised for that reason, but they still follow the reader's theme so
+     this page does not flash white at someone browsing in the dark. -->
 <style>
+  :root { color-scheme: light dark; }
+
   html, body {
     height: 100%;
     margin: 0;
@@ -14,8 +20,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fbfaf8;
-    color: #1a1a1a;
+    background: #faf4ed;
+    background: light-dark(#faf4ed, #130e0b);
+    color: #1e1712;
+    color: light-dark(#1e1712, #e5e0da);
     font-family: Georgia, 'Times New Roman', serif;
     text-align: center;
   }
@@ -27,7 +35,8 @@
     margin: 0 0 1.5rem;
   }
   a {
-    color: #1a1a1a;
+    color: #75190a;
+    color: light-dark(#75190a, #f19266);
     text-decoration: underline;
     text-underline-offset: 3px;
   }

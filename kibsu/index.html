@@ -17,6 +17,10 @@
 <meta name="twitter:title" content="kibsu">
 <meta name="twitter:description" content="Reads your coding-agent instructions and reports which of them can actually be verified.">
 
+<!-- Applies a stored theme before first paint, so a reader who chose dark
+     never sees a white flash. The rest of the theming is pure CSS. -->
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
+
 <link rel="stylesheet" href="/tokens.css">
 <link rel="stylesheet" href="/styles.css">
 
@@ -53,6 +57,7 @@
       <li><a href="/#elsewhere">Elsewhere</a></li>
     </ul>
   </nav>
+  <button class="theme-toggle" type="button" hidden aria-label="Switch theme"></button>
   <hr class="mast-rule" aria-hidden="true">
 </header>
 
@@ -62,6 +67,9 @@
     <p class="lede">What can your agents not do in this repository yet?</p>
 
     <p>You have written instructions for coding agents, an AGENTS.md, a CLAUDE.md, a skills directory, a .cursorrules file. Kibsu reads them alongside your git history and reports which of those instructions anyone could actually verify were followed, and which ones only work when a human remembers.</p>
+
+    <h2 class="inline" id="why">Why it exists</h2>
+    <p>It started as a practical problem. People write those instructions carefully, and then nobody checks whether the agents followed them. I wanted to know how many of them were even checkable in the first place &mdash; how many could be settled either way by someone who was not in the room. So I counted, and then I wrote a tool that counts.</p>
 
     <h2 class="inline" id="run">Run it</h2>
     <pre class="cmd">python -m kibsu report /path/to/any/repo</pre>
@@ -97,5 +105,6 @@
   <p class="foot-domain">mbajalan.com</p>
   <p class="foot-year">2026</p>
 </footer>
+<script src="/site.js" defer></script>
 </body>
 </html>

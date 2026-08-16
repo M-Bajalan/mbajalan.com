@@ -99,11 +99,46 @@ a:active {
    ========================================================================== */
 
 .nav-mast {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: var(--space-sm);
   padding: var(--space-2xl) var(--page-gutter) 0;
   text-align: center;
+}
+
+/* Theme toggle — ships hidden in the markup and is revealed by site.js. With
+   JavaScript off there is no dead control on the page, and the OS preference
+   still works, because that path is pure CSS. */
+
+.theme-toggle {
+  position: absolute;
+  inset-block-start: var(--space-md);
+  inset-inline-end: var(--page-gutter);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px minimum, so it is a real target on a phone */
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  border: var(--rule-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out);
+}
+
+.theme-toggle:hover {
+  color: var(--color-accent);
+  border-color: var(--color-rule);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .mast-name {
@@ -132,6 +167,11 @@ a:active {
 }
 
 .mast-nav a {
+  /* The link text is 16px tall, which is under the 24px minimum target size
+     (WCAG 2.5.8). Padding rather than a larger font keeps the masthead
+     rhythm identical while making the target real on a phone. */
+  display: inline-block;
+  padding-block: var(--space-2xs);
   font-size: var(--text-sm);
   font-variant: small-caps;
   letter-spacing: 0.06em;
@@ -184,6 +224,18 @@ main {
   color: var(--color-ink-2);
   font-weight: 400;
   margin-bottom: var(--space-2xl);
+}
+
+/* Run-in lead-ins — the magazine device that makes continuous prose skimmable
+   without turning the page into a CV with section headers. Each identity
+   thread opens with one, so a reader scanning in eight seconds still picks up
+   networks / SAP / data / AI. */
+
+.run-in {
+  font-variant: small-caps;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-2);
 }
 
 .prose h2.inline {

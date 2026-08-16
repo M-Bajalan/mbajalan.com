@@ -4,18 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mohammed Bajalan — IT &amp; Business Intelligence Lead</title>
-<meta name="description" content="Mohammed Bajalan — IT &amp; Business Intelligence Lead. Data platforms, and workflows where humans and AI agents can verify each other. Erbil, Iraq.">
+<meta name="description" content="Mohammed Bajalan — IT &amp; Business Intelligence Lead in Erbil, Iraq. Nineteen years across networks, SAP and data. I build and run the BI platforms behind sales and distribution.">
 <link rel="canonical" href="https://mbajalan.com/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
 <meta property="og:title" content="Mohammed Bajalan">
-<meta property="og:description" content="IT &amp; Business Intelligence Lead. Data platforms, and workflows where humans and AI agents can verify each other. Erbil, Iraq.">
+<meta property="og:description" content="IT &amp; Business Intelligence Lead. Nineteen years across networks, SAP and data. I build and run the BI platforms behind sales and distribution. Erbil, Iraq.">
 <meta property="og:url" content="https://mbajalan.com/">
 <meta property="og:type" content="website">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mohammed Bajalan">
-<meta name="twitter:description" content="IT &amp; Business Intelligence Lead. Data platforms, and workflows where humans and AI agents can verify each other. Erbil, Iraq.">
+<meta name="twitter:description" content="IT &amp; Business Intelligence Lead. Nineteen years across networks, SAP and data. I build and run the BI platforms behind sales and distribution. Erbil, Iraq.">
+
+<!-- Applies a stored theme before first paint, so a reader who chose dark
+     never sees a white flash. The rest of the theming is pure CSS. -->
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
 
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="styles.css">
@@ -32,6 +36,19 @@
     "https://www.linkedin.com/in/mohammed-bajalan/"
   ],
   "jobTitle": "IT & Business Intelligence Lead",
+  "knowsAbout": [
+    "Business Intelligence",
+    "Data Engineering",
+    "ETL",
+    "SQL Server",
+    "Python",
+    "Microsoft Fabric",
+    "Data Quality",
+    "SAP",
+    "Profit & Loss Analysis",
+    "Enterprise Networking",
+    "Network Security"
+  ],
   "hasCredential": {
     "@type": "EducationalOccupationalCredential",
     "name": "Project Management Professional (PMP)",
@@ -62,19 +79,36 @@
       <li><a href="#elsewhere">Elsewhere</a></li>
     </ul>
   </nav>
+  <button class="theme-toggle" type="button" hidden aria-label="Switch theme"></button>
   <hr class="mast-rule" aria-hidden="true">
 </header>
 
 <main id="main">
   <article class="prose">
-    <p class="lede">IT &amp; Business Intelligence Lead. Data platforms, and workflows where humans and AI agents can verify each other. Erbil, Iraq.</p>
+    <p class="lede">IT &amp; Business Intelligence Lead. I build and run the data platforms behind sales and distribution &mdash; ingestion, warehouse, dashboards, and the operations that keep them alive. Erbil, Iraq.</p>
 
-    <p>Nineteen years in IT. Networks first, then SAP, then data, which is where I stayed.</p>
+    <p>Nineteen years in IT. Networks first, then SAP, then data, which is where I stayed. I still run all three.</p>
 
-    <p>The verification part started as a practical problem. Teams write instructions for coding agents, an AGENTS.md, a CLAUDE.md, a skills directory, and then nobody checks whether the agents followed them. I wanted to know how many of those instructions were even checkable in the first place. So I counted, and then I wrote a tool that counts.</p>
+    <p><span class="run-in">Telecom engineering</span> is where I came in, and the network never left. Enterprise routing and switching on Cisco, firewalls and security policy on Palo Alto. It is the layer nobody notices until it stops, and it is still mine.</p>
+
+    <p><span class="run-in">Then SAP</span>, learned in production and across modules, because the questions I was being asked lived inside the ERP. It turned out to be the bridge: infrastructure on one side, business data on the other, and after a few years you can read both.</p>
+
+    <p><span class="run-in">Data is the middle</span> of the work now. I design, build and operate end-to-end BI platforms for sales and distribution across six regions. Distributor files land every morning; automated ETL in Python and SQL Server ingests them, data-quality checks decide which numbers are allowed through, and the dashboards people open &mdash; on a laptop or a phone &mdash; are built from what survived. Executive reports send themselves. Newer work runs on Microsoft Fabric.</p>
+
+    <p>One person owns that whole line: ingestion, warehouse, semantic model, dashboards, operations. The last word is the one that gets underestimated. A dashboard is easy to build once; the work is having it still be right months later, when a distributor quietly changes a file format and tells nobody.</p>
+
+    <p><span class="run-in">The seat is the real advantage.</span> Most people in this trade stand in one place: a sales manager reads reports someone else built, an analyst builds reports about a business someone else runs. I sit where the two meet, and the view is different there. Service-level KPIs from the fundamentals to the advanced tiers &mdash; coverage, distribution, customer health, missing customers, offtake and expiry risk &mdash; built as more than fifteen analytical engines and counting, across six regions, on both models of the trade: distributor-led markets and direct distribution.</p>
+
+    <p><span class="run-in">Finance is the other half.</span> Ten years as an SAP finance key user runs alongside all of it &mdash; profit and loss, costing, mix. It changes what a number means. Top line and bottom line are not a sequence; they move together, and a sales push that quietly erodes margin is not growth. Finding the mix that moves both at once is the actual job, and you only see it when the same person reads the sales figures and the P&amp;L.</p>
+
+    <p><span class="run-in">The newest thread</span> is AI-assisted engineering &mdash; workflows where agents do real work, writing code, moving data, drafting the documentation nobody wants to write, inside a discipline that checks them. An agent nobody verifies is just a confident stranger. kibsu is the public piece of that thread.</p>
 
     <h2 class="inline" id="work">Work</h2>
     <ul class="work">
+      <li>
+        <p class="work-name"><a href="/demo/sales/">Sales &amp; distribution dashboard</a></p>
+        <span class="work-note">A working demo of the kind of thing I build daily: KPI tiles, monthly trend, top movers, outlet coverage. Entirely synthetic data, hand-drawn SVG, no chart library and no external requests.</span>
+      </li>
       <li>
         <p class="work-name"><a href="/kibsu/">kibsu</a></p>
         <span class="work-note">Reads the instructions you have written for coding agents, alongside your git history, and reports which of them anyone could actually verify were followed. Python, no dependencies, MIT.</span>
@@ -99,5 +133,6 @@
   <p class="foot-domain">mbajalan.com</p>
   <p class="foot-year">2026</p>
 </footer>
+<script src="/site.js" defer></script>
 </body>
 </html>

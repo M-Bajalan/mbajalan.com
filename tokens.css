@@ -1,22 +1,134 @@
-:root {
-  /* === Colour — Newsprint: warm paper, roman ink, warm accent === */
-  /* Paper band: light (L > 85%) · Display style: roman-serif · Accent hue: warm (H ~30) */
-  --color-paper:      oklch(97%   0.011 75);   /* warm cream newsprint paper */
-  --color-paper-2:     oklch(94%  0.013 75);   /* slightly deeper paper, footer band */
-  --color-rule:        oklch(80%  0.015 70);   /* hairline rule */
-  --color-rule-strong: oklch(70%  0.018 65);   /* double rule under masthead */
-  --color-neutral:     oklch(45%  0.014 65);   /* meta / muted text — safe margin over 4.5:1 */
-  --color-muted:       oklch(40%  0.013 60);   /* deeper muted text (nav links) */
-  --color-ink:         oklch(21%  0.014 55);   /* body ink, warm near-black */
-  --color-ink-2:       oklch(15%  0.012 50);   /* masthead / heading ink */
-  --color-accent:      oklch(37%  0.145 32);   /* warm rust — links, focus, marks */
-  --color-accent-2:    oklch(30%  0.130 30);   /* accent hover / active */
-  --color-focus:       oklch(37%  0.145 32);   /* focus ring — same as accent, >=3:1 on paper */
-  --color-selection:   oklch(88%  0.040 45);   /* text selection background */
+/* ==========================================================================
+   Design tokens — Newsprint
+   --------------------------------------------------------------------------
+   THEMING, in one paragraph:
 
-  /* === Typography === */
-  /* Long Document collapses to one considered serif family (display + body);
-     a monospace outlier tags colophon / meta lines only (2 slot-role). */
+   Every colour token below is declared with `light-dark(<light>, <dark>)`,
+   so a colour's two values live on ONE line and cannot drift apart. Which
+   half is used is decided by `color-scheme`:
+
+     :root                      color-scheme: light dark   -> follows the OS
+     :root[data-theme="light"]  color-scheme: light        -> pinned light
+     :root[data-theme="dark"]   color-scheme: dark         -> pinned dark
+
+   So "auto" is simply the ABSENCE of a data-theme attribute, and the toggle
+   only ever has to add, change, or remove that one attribute. Setting
+   `color-scheme` also themes form controls and scrollbars for free.
+
+   Each token has a plain light-only declaration immediately above the
+   light-dark() one. Browsers too old for light-dark() ignore the second
+   declaration and get the light theme — the same look v1 shipped with.
+
+   Every ratio quoted in the comments was MEASURED, not estimated: oklch was
+   converted to sRGB, then to WCAG relative luminance. The status marks were
+   additionally checked under simulated protanopia, deuteranopia and
+   tritanopia. Gate script and method:
+   scratchpad/contrast.py + verify_final.py (2026-08-16).
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark;  }
+
+:root {
+  /* === Colour — Newsprint ================================================
+     Light: warm cream paper, warm near-black ink, rust accent.
+     Dark:  the same press at night — warm near-black paper, warm off-white
+            ink, the rust lifted to stay legible. Not an inversion; the dark
+            values were chosen and measured independently.
+     ====================================================================== */
+
+  /* Page and surfaces */
+  --color-paper: oklch(97% 0.011 75);
+  --color-paper: light-dark(oklch(97% 0.011 75), oklch(17% 0.010 62));
+
+  --color-paper-2: oklch(94% 0.013 75);          /* footer band */
+  --color-paper-2: light-dark(oklch(94% 0.013 75), oklch(21% 0.011 62));
+
+  --color-surface: oklch(99.5% 0.004 75);        /* cards, panels */
+  --color-surface: light-dark(oklch(99.5% 0.004 75), oklch(22.5% 0.012 62));
+
+  /* Rules — decorative dividers, deliberately below 3:1. WCAG 1.4.11 scopes
+     non-text contrast to UI components and MEANINGFUL graphics; a hairline
+     is neither, and darkening it would destroy the newsprint texture. */
+  --color-rule: oklch(80% 0.015 70);
+  --color-rule: light-dark(oklch(80% 0.015 70), oklch(32% 0.012 60));
+
+  --color-rule-strong: oklch(70% 0.018 65);      /* double rule under masthead */
+  --color-rule-strong: light-dark(oklch(70% 0.018 65), oklch(42% 0.014 58));
+
+  /* Text tiers — all measured >= 4.5:1 on paper, paper-2 and surface */
+  --color-neutral: oklch(45% 0.014 65);          /* meta, axis labels  6.8:1 / 7.7:1 */
+  --color-neutral: light-dark(oklch(45% 0.014 65), oklch(72% 0.014 68));
+
+  --color-muted: oklch(40% 0.013 60);            /* nav links          8.5:1 / 9.5:1 */
+  --color-muted: light-dark(oklch(40% 0.013 60), oklch(78% 0.012 66));
+
+  --color-ink: oklch(21% 0.014 55);              /* body              16.3:1 / 14.6:1 */
+  --color-ink: light-dark(oklch(21% 0.014 55), oklch(91% 0.010 75));
+
+  --color-ink-2: oklch(15% 0.012 50);            /* headings          18.0:1 / 17.5:1 */
+  --color-ink-2: light-dark(oklch(15% 0.012 50), oklch(97% 0.009 78));
+
+  /* Accent — chroma sits just inside the sRGB gamut at each lightness, so the
+     browser renders what is declared instead of silently clipping it. */
+  --color-accent: oklch(37% 0.128 32);           /* links             10.2:1 / 8.2:1 */
+  --color-accent: light-dark(oklch(37% 0.128 32), oklch(75% 0.130 45));
+
+  --color-accent-2: oklch(30% 0.108 30);         /* hover             13.1:1 / 11.4:1 */
+  --color-accent-2: light-dark(oklch(30% 0.108 30), oklch(84% 0.098 52));
+
+  --color-focus: oklch(37% 0.128 32);
+  --color-focus: light-dark(oklch(37% 0.128 32), oklch(75% 0.130 45));
+
+  --color-selection: oklch(88% 0.040 45);
+  --color-selection: light-dark(oklch(88% 0.040 45), oklch(38% 0.070 40));
+
+  /* === Data colour =======================================================
+     Two series only. A sales chart compares THIS period against the LAST
+     one, so a five-colour categorical ramp would be decoration pretending
+     to be information. Current period takes the accent; the prior period
+     recedes to a cool grey-blue.  Separation: dE 0.30 light / 0.23 dark,
+     worst-case under simulated CVD 0.40 / 0.26.
+     ====================================================================== */
+  --series-current: oklch(37% 0.128 32);
+  --series-current: light-dark(oklch(37% 0.128 32), oklch(75% 0.130 45));
+
+  --series-prior: oklch(62% 0.036 245);
+  --series-prior: light-dark(oklch(62% 0.036 245), oklch(60% 0.040 245));
+
+  /* Status MARKS — dots and fills. Non-text, so 3:1 is the bar, which buys
+     the lightness range these hues need to stay apart for red-green colour
+     blindness. Worst-case CVD separation 0.21 light / 0.20 dark.
+     They are never the only signal: every status also carries a WORD and a
+     shape (filled / half / open), so the colour is the fast-scan layer, not
+     the meaning. That is WCAG 1.4.1, and it is also just better design. */
+  --mark-good: oklch(62% 0.120 170);
+  --mark-good: light-dark(oklch(62% 0.120 170), oklch(78% 0.130 158));
+
+  --mark-warn: oklch(56% 0.110 80);
+  --mark-warn: light-dark(oklch(56% 0.110 80), oklch(82% 0.130 80));
+
+  --mark-bad: oklch(34% 0.140 15);
+  --mark-bad: light-dark(oklch(34% 0.140 15), oklch(72% 0.140 28));
+
+  /* Status TEXT — deltas. Needs the full 4.5:1, and the +/- sign already
+     provides the redundant encoding, so these are tuned for legibility
+     rather than for CVD separation. */
+  --text-good: oklch(48% 0.094 170);             /* 5.5:1 / 10.1:1 */
+  --text-good: light-dark(oklch(48% 0.094 170), oklch(78% 0.130 158));
+
+  --text-bad: oklch(40% 0.150 22);               /* 9.1:1 / 7.3:1 */
+  --text-bad: light-dark(oklch(40% 0.150 22), oklch(72% 0.140 28));
+
+  /* === Typography ========================================================
+     No webfonts are loaded — the site makes zero external requests, and that
+     is a property worth more than a specific typeface. These stacks resolve
+     to the reader's system serif and mono.
+     ====================================================================== */
   --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
   --font-body:    "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
   --font-outlier: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -28,8 +140,9 @@
   --text-lg:   1.5625rem;  /* 25px  */
   --text-xl:   1.9531rem;  /* 31.25px */
   --text-2xl:  2.4414rem;  /* 39px  */
-  --text-mast: clamp(2.25rem, 5vw + 1rem, 3.625rem); /* masthead name */
-  --text-title: clamp(1.9531rem, 3vw + 1rem, 2.4414rem); /* inner-page headline, sits below the masthead */
+  --text-mast:  clamp(2.25rem, 5vw + 1rem, 3.625rem);
+  --text-title: clamp(1.9531rem, 3vw + 1rem, 2.4414rem);
+  --text-kpi:   clamp(1.5625rem, 2.5vw + 0.75rem, 1.9531rem);
 
   --leading-tight: 1.15;
   --leading-snug:  1.35;
@@ -49,24 +162,26 @@
 
   /* === Measure / page === */
   --measure: 65ch;
+  --measure-wide: 78rem;        /* dashboards break the prose column */
   --page-gutter: clamp(1.25rem, 5vw, 3rem);
 
   /* === Rules === */
   --rule-hair: 1px;
   --rule-thick: 2px;
 
-  /* === Radius (kept minimal — print metaphor, square by default) === */
+  /* === Radius — print metaphor, square by default === */
   --radius-none: 0;
   --radius-sm: 0.125rem;
+  --radius-pill: 999px;
 
-  /* === Motion — Newsprint reads as static print; one subtle link-colour
-     shift is the entire motion budget, and it collapses to 0 under
-     prefers-reduced-motion. === */
+  /* === Motion — Newsprint reads as static print. The motion budget is one
+     colour shift and one chart draw-in, both zero under reduced motion. === */
   --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:     cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-short: 120ms;
   --dur-med:   180ms;
+  --dur-long:  420ms;
 
   /* === Z-index scale === */
   --z-base:     1;
@@ -82,5 +197,6 @@
   :root {
     --dur-short: 0ms;
     --dur-med:   0ms;
+    --dur-long:  0ms;
   }
 }
