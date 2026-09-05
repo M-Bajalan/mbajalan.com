@@ -67,6 +67,29 @@ SEASON = [1.02, 0.97, 1.00, 1.04, 1.07, 0.94,
 
 REGION_WEIGHT = {"North": 0.27, "Central": 0.34, "South": 0.21, "Coast": 0.18}
 
+# One synthetic note, referenced by both generated files, so the two pages
+# cannot drift into describing themselves differently.
+SYNTHETIC_NOTE = ("Every figure on this page is generated. No real customer, "
+                   "distributor, product or number appears anywhere in it.")
+
+FULL_MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+               "August", "September", "October", "November", "December"]
+
+# Fictional unit cost per carton, as a ratio of price, one per category. This
+# is what turns the sales facts into a margin story: the same cartons and the
+# same revenue, with an invented cost line under them. Ratios were picked so
+# the "push this SKU" default sits BELOW the discount cost used on the margin
+# page's what-if slider, while at least one other line sits above it — the
+# contrast is the point of that page, and reconcile_margin() asserts it.
+COST_RATIO = {
+    "Edible oil": 0.79,
+    "Hot drinks": 0.56,
+    "Biscuits":   0.63,
+    "Home care":  0.67,
+    "Ambient":    0.81,
+    "Personal":   0.52,
+}
+
 
 def build_facts(rng):
     """One row per (year, month, distributor, sku). The single source of truth."""
@@ -156,6 +179,22 @@ def aggregate(facts, coverage):
     cur_v, cur_q = monthly(cur, CUR_THROUGH)
     pri_v, pri_q = monthly(pri_full, 12)
 
+    # the same monthly series, split by distributor — this is the data behind
+    # the coverage table's drill-down. Grouped once here rather than filtered
+    # per click in charts.js, because a client-side filter over the same
+    # facts twice is just this function with extra steps, and reconcile()
+    # can only check a shape that already exists in the written file.
+    by_dist = {}
+    for dist, _region in DISTRIBUTORS:
+        d_cur = [f for f in cur if f["distributor"] == dist]
+        d_pri_full = [f for f in pri_full if f["distributor"] == dist]
+        d_cur_v, d_cur_q = monthly(d_cur, CUR_THROUGH)
+        d_pri_v, d_pri_q = monthly(d_pri_full, 12)
+        by_dist[dist] = {
+            "value":  {"current": d_cur_v, "prior": d_pri_v},
+            "volume": {"current": d_cur_q, "prior": d_pri_q},
+        }
+
     # top movers — by SKU, current vs prior like-for-like, on value
     by_sku_cur = defaultdict(float)
     by_sku_pri = defaultdict(float)
@@ -210,8 +249,7 @@ def aggregate(facts, coverage):
             "monthsElapsed": CUR_THROUGH,
             "months": MONTHS,
             "seed": SEED,
-            "note": ("Every figure on this page is generated. No real customer, "
-                     "distributor, product or number appears anywhere in it."),
+            "note": SYNTHETIC_NOTE,
         },
         "kpi": {
             "value":    {"current": money(cur_val), "prior": money(pri_val)},
@@ -225,6 +263,7 @@ def aggregate(facts, coverage):
         "trend": {
             "value":  {"current": cur_v, "prior": pri_v},
             "volume": {"current": cur_q, "prior": pri_q},
+            "byDistributor": by_dist,
         },
         "movers": movers,
         "coverage": cov,
@@ -236,6 +275,71 @@ def aggregate(facts, coverage):
         },
     }
     return data, cur, pri
+
+
+WHAT_IF = {
+    "defaultSku": "Solara Sunflower Oil 1.8L",
+    "maxPushPct": 40,
+    "stepPct": 1,
+    "discountPerPushPct": 0.35,
+}
+
+
+def build_margin(cur):
+    """The margin page's facts. Same current-year rows the sales page uses —
+    NOT a separate draw — with one invented number, unit cost, laid on top
+    of them via COST_RATIO. Product order is revenue descending, because
+    that is the order a reader scanning for "what actually makes money"
+    wants, not SKU-table order."""
+    by_sku_val = defaultdict(float)
+    by_sku_qty = defaultdict(int)
+    for r in cur:
+        by_sku_val[r["sku"]] += r["value"]
+        by_sku_qty[r["sku"]] += r["cartons"]
+
+    products = []
+    for sku, brand, cat, _base, price, _trend in SKUS:
+        cost = money(price * COST_RATIO[cat])
+        cartons = by_sku_qty[sku]
+        revenue = money(by_sku_val[sku])
+        cogs = money(cartons * cost)
+        gp = money(revenue - cogs)
+        products.append({
+            "sku": sku, "brand": brand, "category": cat,
+            "cartons": cartons, "price": round(price, 2), "cost": cost,
+            "revenue": revenue, "cogs": cogs, "grossProfit": gp,
+            "marginPct": round(gp / revenue * 100, 1) if revenue else 0.0,
+            "mixPct": 0.0,   # filled in below, once the base total is known
+        })
+    products.sort(key=lambda p: p["revenue"], reverse=True)
+
+    base_cartons = sum(p["cartons"] for p in products)
+    base_revenue = money(sum(p["revenue"] for p in products))
+    base_cogs = money(sum(p["cogs"] for p in products))
+    base_gp = money(base_revenue - base_cogs)
+    base_margin = round(base_gp / base_revenue * 100, 1)
+
+    for p in products:
+        p["mixPct"] = round(p["revenue"] / base_revenue * 100, 1)
+
+    return {
+        "meta": {
+            "synthetic": True,
+            "currency": CURRENCY,
+            # Same "no year numbers" rule as the sales page's meta — derived
+            # from CUR_THROUGH so the label cannot drift out of step with the
+            # facts it describes.
+            "periodLabel": "This year, January to %s" % FULL_MONTHS[CUR_THROUGH - 1],
+            "seed": SEED,
+            "note": SYNTHETIC_NOTE,
+        },
+        "base": {
+            "cartons": base_cartons, "revenue": base_revenue,
+            "cogs": base_cogs, "grossProfit": base_gp, "marginPct": base_margin,
+        },
+        "products": products,
+        "whatIf": WHAT_IF,
+    }
 
 
 # ------------------------------------------------------------------ the gate
@@ -263,6 +367,29 @@ def reconcile(data, cur, pri):
     close(sum(c["covered"] for c in data["coverage"]),
           data["coverageTotal"]["covered"], 0.5, "coverage rows vs coverage total")
 
+    # the drill-down series (C5): every distributor, every month, must sum
+    # back to the page-level trend it was split from. Checked measure by
+    # measure and month by month rather than as one grand total, because a
+    # grand total can hide a single wrong month behind an offsetting one.
+    by_dist = data["trend"]["byDistributor"]
+    dist_names = [d for d, _r in DISTRIBUTORS]
+    if sorted(by_dist.keys()) != sorted(dist_names):
+        problems.append("byDistributor keys do not match DISTRIBUTORS")
+    for i in range(CUR_THROUGH):
+        close(sum(by_dist[d]["value"]["current"][i] for d in dist_names),
+              data["trend"]["value"]["current"][i], 0.05,
+              "byDistributor value current[%d] vs trend" % i)
+        close(sum(by_dist[d]["volume"]["current"][i] for d in dist_names),
+              data["trend"]["volume"]["current"][i], 0.5,
+              "byDistributor volume current[%d] vs trend" % i)
+    for i in range(12):
+        close(sum(by_dist[d]["value"]["prior"][i] for d in dist_names),
+              data["trend"]["value"]["prior"][i], 0.05,
+              "byDistributor value prior[%d] vs trend" % i)
+        close(sum(by_dist[d]["volume"]["prior"][i] for d in dist_names),
+              data["trend"]["volume"]["prior"][i], 0.5,
+              "byDistributor volume prior[%d] vs trend" % i)
+
     # prior-year series must hold 12 months, current must hold exactly as many
     # months as the fiction says have happened
     if len(data["trend"]["value"]["prior"]) != 12:
@@ -278,31 +405,98 @@ def reconcile(data, cur, pri):
     return problems
 
 
+def reconcile_margin(margin, sales_kpi):
+    """The margin page must reconcile to itself (products sum to base) AND
+    to the sales page (base sums to the same KPI totals) — two pages built
+    from one set of facts have to agree, or the demo's whole point is lost.
+    Fail loudly, write nothing."""
+    problems = []
+
+    def close(a, b, tol, what):
+        if abs(a - b) > tol:
+            problems.append("%s: %.2f vs %.2f (diff %.2f)" % (what, a, b, a - b))
+
+    base = margin["base"]
+    products = margin["products"]
+
+    close(sum(p["revenue"] for p in products), base["revenue"],
+          0.05, "margin products revenue sum vs base revenue")
+    close(base["revenue"], sales_kpi["value"]["current"],
+          0.05, "margin base revenue vs sales KPI value")
+    close(sum(p["cartons"] for p in products), base["cartons"],
+          0.5, "margin products cartons sum vs base cartons")
+    close(base["cartons"], sales_kpi["volume"]["current"],
+          0.5, "margin base cartons vs sales KPI volume")
+    close(sum(p["grossProfit"] for p in products), base["grossProfit"],
+          0.05, "margin products grossProfit sum vs base grossProfit")
+    close(sum(p["mixPct"] for p in products), 100.0,
+          0.2, "margin mixPct sum vs 100")
+
+    for p in products:
+        if not (0 < p["marginPct"] < 100):
+            problems.append("marginPct out of (0, 100) for %s: %.1f" %
+                             (p["sku"], p["marginPct"]))
+
+    # the what-if slider only makes a point if the default push target is
+    # cheap to discount and at least one other line is not — otherwise
+    # "push this SKU instead" has nothing to contrast against.
+    threshold = margin["whatIf"]["discountPerPushPct"] * 100
+    default_sku = margin["whatIf"]["defaultSku"]
+    default_rows = [p for p in products if p["sku"] == default_sku]
+    if not default_rows:
+        problems.append("whatIf.defaultSku %r not found in products" % default_sku)
+    else:
+        dm = default_rows[0]["marginPct"]
+        if not (dm < threshold):
+            problems.append("default SKU margin %.1f is not below the %.1f "
+                             "discount threshold — no story to tell" % (dm, threshold))
+    if not any(p["marginPct"] > threshold for p in products):
+        problems.append("no product margin exceeds the %.1f discount "
+                         "threshold — the contrast the page is built on is missing" %
+                         threshold)
+
+    return problems
+
+
+def write_generated(path, var_name, body_dict):
+    """Both generated files share one header shape and one write pattern, so
+    a reader who has seen one recognises the other instantly."""
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), path)
+    body = json.dumps(body_dict, indent=2, sort_keys=False, ensure_ascii=True)
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("/* GENERATED by demo/build_sales_data.py — do not hand-edit.\n"
+                 "   100%% synthetic. No real customer, distributor, product or\n"
+                 "   figure appears in this file. Seed %d, so regenerating gives\n"
+                 "   byte-identical output. */\n" % SEED)
+        fh.write("window.%s = " % var_name)
+        fh.write(body)
+        fh.write(";\n")
+    return out
+
+
 def main():
     rng = random.Random(SEED)
     facts = build_facts(rng)
     coverage = build_coverage(rng)
     data, cur, pri = aggregate(facts, coverage)
+    margin = build_margin(cur)
 
+    # Both datasets are checked before EITHER file is written. A margin
+    # failure after the sales file already landed on disk would leave a
+    # half-updated pair — exactly the kind of silent drift this generator
+    # exists to prevent.
     problems = reconcile(data, cur, pri)
+    problems += reconcile_margin(margin, data["kpi"])
     if problems:
         print("RECONCILIATION FAILED — nothing written:")
         for p in problems:
             print("  !", p)
         raise SystemExit(1)
 
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sales-data.js")
-    body = json.dumps(data, indent=2, sort_keys=False, ensure_ascii=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("/* GENERATED by demo/build_sales_data.py — do not hand-edit.\n"
-                 "   100%% synthetic. No real customer, distributor, product or\n"
-                 "   figure appears in this file. Seed %d, so regenerating gives\n"
-                 "   byte-identical output. */\n" % SEED)
-        fh.write("window.DEMO_SALES = ")
-        fh.write(body)
-        fh.write(";\n")
+    sales_out = write_generated("sales-data.js", "DEMO_SALES", data)
+    margin_out = write_generated("margin-data.js", "DEMO_MARGIN", margin)
 
-    print("reconciled OK -> %s" % out)
+    print("reconciled OK -> %s" % sales_out)
     print("  facts rows          %d" % len(facts))
     print("  KPI value current   %s %.2f" % (CURRENCY, data["kpi"]["value"]["current"]))
     print("  KPI value prior LFL %s %.2f" % (CURRENCY, data["kpi"]["value"]["prior"]))
@@ -314,6 +508,15 @@ def main():
         data["movers"][0]["sku"], data["movers"][0]["pct"]))
     print("  worst mover         %s %+.1f%%" % (
         data["movers"][-1]["sku"], data["movers"][-1]["pct"]))
+
+    default_sku = margin["whatIf"]["defaultSku"]
+    default_margin = next(p["marginPct"] for p in margin["products"]
+                           if p["sku"] == default_sku)
+    print("margin reconciled OK -> %s" % margin_out)
+    print("  base revenue        %s %.2f" % (CURRENCY, margin["base"]["revenue"]))
+    print("  base margin         %.1f%%" % margin["base"]["marginPct"])
+    print("  push-SKU margin     %.1f%% (%s)" % (default_margin, default_sku))
+    print("  discount threshold  %.1f%%" % (margin["whatIf"]["discountPerPushPct"] * 100))
 
 
 if __name__ == "__main__":

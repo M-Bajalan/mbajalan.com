@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-themes="light dark terminal">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,23 +7,38 @@
 <meta name="description" content="A working sales-and-distribution dashboard built on entirely synthetic data: KPI tiles, monthly trend, top movers and outlet coverage. No library, no build step, no external requests.">
 <link rel="canonical" href="https://mbajalan.com/demo/sales/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
 
 <meta property="og:title" content="Sales &amp; distribution — demo dashboard">
 <meta property="og:description" content="A working sales dashboard on 100% synthetic data. Hand-rolled SVG, no chart library, no external requests.">
 <meta property="og:url" content="https://mbajalan.com/demo/sales/">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Mohammed Bajalan">
+<meta property="og:image" content="https://mbajalan.com/og/card-demo-v1.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Sales and distribution demo dashboard on synthetic data — KPI tiles, monthly trend, top movers and outlet coverage.">
 
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Sales &amp; distribution — demo dashboard">
 <meta name="twitter:description" content="A working sales dashboard on 100% synthetic data. Hand-rolled SVG, no chart library, no external requests.">
+<meta name="twitter:image" content="https://mbajalan.com/og/card-demo-v1.png">
+<meta name="twitter:image:alt" content="Sales and distribution demo dashboard on synthetic data — KPI tiles, monthly trend, top movers and outlet coverage.">
 
-<!-- Applies a stored theme before first paint, so a reader who chose dark
-     never sees a white flash. The rest of the theming is pure CSS. -->
-<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
+<!-- Applies a stored theme, and a stored or linked-in view, before first
+     paint, so a reader who chose dark (or terminal) never sees a white
+     flash, and a reader who followed a ?view= link never sees the default
+     view render first. The rest of theming and viewing is pure CSS, keyed
+     off these two attributes; this script only ever sets them. -->
+<script>try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'||t==='terminal')document.documentElement.dataset.theme=t}catch(e){}try{var v=new URLSearchParams(location.search).get('view')||localStorage.getItem('demo-view');if(v==='executive'||(v==='phone'&&!window.matchMedia('(max-width: 40rem)').matches))document.documentElement.dataset.view=v}catch(e){}</script>
 
 <link rel="stylesheet" href="/tokens.css">
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/demo/dashboard.css">
+<link rel="stylesheet" href="/demo/views.css">
+<link rel="stylesheet" href="/demo/terminal.css">
+<link rel="stylesheet" href="/demo/motion.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -44,10 +59,20 @@
 <main id="main">
   <div class="dash">
 
-    <div class="prose-intro">
+    <div class="prose-intro prose-intro-hero">
       <h1 class="page-title">Sales &amp; distribution</h1>
       <p class="lede">A demo dashboard, in the shape of the ones I build for sales and distribution.</p>
+      <nav class="demo-nav" aria-label="Demos">
+        <span aria-current="page">Sales &amp; distribution</span>
+        <a href="/demo/margin/">Margin &amp; mix</a>
+      </nav>
     </div>
+
+    <!-- Built by views.js: a small-caps "View" label and three buttons
+         (Executive / Analyst / Phone). Ships hidden and empty so there is
+         no dead control with JavaScript off — see the theme-toggle button
+         above for the same idiom. -->
+    <div class="view-bar" data-view-bar hidden></div>
 
     <p class="demo-banner">
       <strong>Demo — synthetic data</strong>
@@ -151,10 +176,11 @@
         <li><strong>Status is never only a colour.</strong> Each one is a word, a dot shape and a colour. It survives being printed in black and white, and it survives red-green colour blindness. The palette was checked against simulated protanopia, deuteranopia and tritanopia rather than eyeballed.</li>
         <li><strong>The chart has a text alternative.</strong> Every figure in it is one disclosure away as a real table, and each month is reachable by keyboard. A chart that only exists as pixels is unreadable to a screen reader and unquotable to everyone else.</li>
         <li><strong>No tooltip.</strong> Hovering, tapping or tabbing a month updates one line above the chart. The same behaviour for a mouse, a finger and a keyboard, and it cannot fall off the edge of a phone.</li>
-        <li><strong>No years on the page.</strong> The series are &ldquo;this year&rdquo; and &ldquo;last year&rdquo;. A static page cannot refresh itself, so a hard-coded year would start reading as stale data the moment it passed.</li>
+        <li><strong>No years in the data.</strong> The series are &ldquo;this year&rdquo; and &ldquo;last year&rdquo;. A static page cannot refresh itself, so a hard-coded year in a chart would start reading as stale data the moment it passed. The footer&rsquo;s year is the site&rsquo;s date, not the data&rsquo;s.</li>
         <li><strong>Numbers are set in a monospaced face</strong> so digits line up in a column and a figure does not jump sideways when it changes width.</li>
+        <li><strong>The phone view is not a second layout.</strong> It is this same page, in a container 390px wide, read by a container query instead of the window's own width. What sits inside the phone frame above is exactly what a phone gets — because it is the same markup, not a copy built to match it.</li>
       </ul>
-      <p>The page weighs almost nothing, loads no fonts, calls no third party, and works with JavaScript disabled apart from the chart itself.</p>
+      <p>The page weighs almost nothing, loads one font file from this domain, and calls no third party. It does need JavaScript &mdash; the tiles, the chart, the movers and the coverage table are all drawn from the data file on load. Without it you get the writing and the notice that the data is invented, and nothing pretending to be a number.</p>
     </section>
 
   </div>
@@ -168,5 +194,7 @@
 <script src="/site.js" defer></script>
 <script src="/demo/sales-data.js" defer></script>
 <script src="/demo/charts.js" defer></script>
+<script src="/demo/views.js" defer></script>
+<script src="/demo/motion.js" defer></script>
 </body>
 </html>

@@ -26,6 +26,19 @@
    scratchpad/contrast.py + verify_final.py (2026-08-16).
    ========================================================================== */
 
+/* The one served typeface. Variable: optical size 6-72 (the masthead and the
+   body text get different drawings from one file) and weights 400 600. Latin
+   subset only -- the site is written in English. swap: text paints in the
+   fallback serif at once and re-flows into Newsreader when the file lands. */
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/newsreader-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   color-scheme: light dark;
 }
@@ -48,8 +61,8 @@
   --color-paper-2: oklch(94% 0.013 75);          /* footer band */
   --color-paper-2: light-dark(oklch(94% 0.013 75), oklch(21% 0.011 62));
 
-  --color-surface: oklch(99.5% 0.004 75);        /* cards, panels */
-  --color-surface: light-dark(oklch(99.5% 0.004 75), oklch(22.5% 0.012 62));
+  --color-surface: oklch(99.5% 0.006 75);        /* cards, panels */
+  --color-surface: light-dark(oklch(99.5% 0.006 75), oklch(22.5% 0.012 62));
 
   /* Rules — decorative dividers, deliberately below 3:1. WCAG 1.4.11 scopes
      non-text contrast to UI components and MEANINGFUL graphics; a hairline
@@ -112,8 +125,13 @@
   --mark-warn: oklch(56% 0.110 80);
   --mark-warn: light-dark(oklch(56% 0.110 80), oklch(82% 0.130 80));
 
-  --mark-bad: oklch(34% 0.140 15);
-  --mark-bad: light-dark(oklch(34% 0.140 15), oklch(72% 0.140 28));
+  /* Light "bad" moved from brick (15°) to wine (345°) on 2026-08-16: the brick sat
+     17° from the rust accent, so "declining" and "this year" read as one colour
+     two panels apart. Measured after the move: 10.7:1 / 9.8:1 / 11.5:1 on the
+     three surfaces; separation from the accent 0.047 -> 0.108; worst-case CVD
+     separation from good/warn 0.214 (was 0.216). Dark left as measured. */
+  --mark-bad: oklch(36% 0.140 345);
+  --mark-bad: light-dark(oklch(36% 0.140 345), oklch(72% 0.140 28));
 
   /* Status TEXT — deltas. Needs the full 4.5:1, and the +/- sign already
      provides the redundant encoding, so these are tuned for legibility
@@ -121,13 +139,17 @@
   --text-good: oklch(48% 0.094 170);             /* 5.5:1 / 10.1:1 */
   --text-good: light-dark(oklch(48% 0.094 170), oklch(78% 0.130 158));
 
-  --text-bad: oklch(40% 0.150 22);               /* 9.1:1 / 7.3:1 */
-  --text-bad: light-dark(oklch(40% 0.150 22), oklch(72% 0.140 28));
+  --text-bad: oklch(40% 0.160 0);                /* 9.2:1 / 7.3:1 — light moved with the mark, see above */
+  --text-bad: light-dark(oklch(40% 0.160 0), oklch(72% 0.140 28));
 
   /* === Typography ========================================================
-     No webfonts are loaded — the site makes zero external requests, and that
-     is a property worth more than a specific typeface. These stacks resolve
-     to the reader's system serif and mono.
+     ONE typeface is served, from this domain: Newsreader (SIL Open Font
+     License, licence text in /fonts/OFL.txt), as a single latin variable
+     file carrying optical size 6-72 and weights 400-600, declared in the
+     @font-face block above. Before 2026-08-16 nothing was served and the
+     stack fell straight through to the reader's system serif -- the
+     personality existed only on paper. The site still calls no third party.
+     The mono stack is deliberately left to the system.
      ====================================================================== */
   --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
   --font-body:    "Newsreader", ui-serif, Georgia, "Times New Roman", serif;

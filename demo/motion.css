@@ -1,0 +1,171 @@
+/* ==========================================================================
+   Entrance motion — demo dashboard.
+
+   The cardinal rule, and the only one that matters for correctness here:
+   default (no class) IS the finished page. Every rule below is scoped under
+   `.dash.is-animating`, and every keyframe runs FROM a hidden state TO the
+   element's ordinary, un-animated appearance. Nobody but motion.js ever
+   touches that class. So with JavaScript off, or under
+   `prefers-reduced-motion: reduce` (motion.js does nothing at all in that
+   case — see its own header), none of these selectors ever match, and the
+   page charts.js already rendered is exactly what a reader sees — nothing
+   is hidden, offset, or waiting on a script that might not run.
+
+   `--dur-*` already collapse to 0ms under reduced motion (tokens.css), and
+   styles.css separately forces every animation-duration to 0ms under that
+   same media query. Both are belt-and-suspenders here, since motion.js's
+   own guard means `.is-animating` is never added in a reduced-motion
+   session in the first place.
+
+   TIMING BUDGET — worked out here because nobody reviewing this can run it
+   and watch it. Everything is timed to be finished at or before ~1.2s, with
+   the prior-year line as the deliberate long pole (its 300ms delay + 900ms
+   draw was specified as exactly 1200ms):
+
+     KPI tiles     4 tiles  x 60ms stagger  + 420ms  -> last ends  600ms
+     panels        flat 200ms delay         + 420ms  -> ends       620ms
+     mover bars   10 bars   x 40ms stagger  + 420ms  -> last ends  780ms
+     table rows   18 rows   x 30ms stagger  + 420ms  -> last ends  930ms
+     line-prior    300ms delay + 900ms draw          -> ends      1200ms
+     dot-prior    1050ms delay + 120ms fade          -> ends      1170ms
+
+   (Row/mover counts above are today's data shape — 10 SKUs; the trend table
+   always renders all 12 months (elapsed ones plus "—" placeholders), plus
+   5 distributor rows and 1 total row in the coverage table, for 18 — and
+   the stagger is per-element, so a change in row count only ever moves the
+   LAST row's start time, it never changes the shape of this budget.) The
+   line finishing at the 1200ms mark is the ceiling by design, not an
+   accident.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- KPI tiles
+   Rise in together, staggered 60ms apart in reading order. --i is set by
+   motion.js on each .kpi; var(--i, 0) means a tile that somehow got no index
+   still renders (immediately) instead of silently never animating. */
+
+@keyframes motion-kpi-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dash.is-animating .kpi {
+  /* 10px is the contract's own figure for this nudge, not a layout
+     dimension — tokens.css's --space-* scale is for margins, gaps and
+     padding, and has no entry for "how far a tile drops in from", so this
+     one stays a literal pixel value rather than being forced onto the
+     nearest unrelated spacing step. */
+  animation: motion-kpi-in var(--dur-long) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ------------------------------------------------------- panels & exec-flag
+   One fade-rise, no per-item stagger: there is no reading order among the
+   trend / movers / coverage panels (or the executive callout) that a
+   stagger would usefully express, so they settle together. The flat 200ms
+   delay starts them right as the last KPI tile begins its own rise (at
+   180ms), so the page reads as one continuous settle rather than two
+   visibly separate waves. */
+
+@keyframes motion-panel-in {
+  from { opacity: 0; transform: translateY(var(--space-xs)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dash.is-animating .exec-flag,
+.dash.is-animating .panel {
+  animation: motion-panel-in var(--dur-long) var(--ease-out) both;
+  animation-delay: 200ms;
+}
+
+/* --------------------------------------------------------------- mover bars
+   Bars grow from the zero line rather than fading in place, because that is
+   what makes a diverging bar chart legible: the reader's eye is told where
+   zero is before it is told how far each bar gets from it.
+
+   charts.js sets an inline `left` or `right` (never both) on .mover-bar to
+   say which side of the zero line it sits on, and this file cannot touch
+   charts.js. Reading that inline style back through an attribute selector
+   is the only way to put the transform-origin on the correct edge without
+   asking B1 for a second data attribute — [style*="left"] can only ever
+   match the bars charts.js positioned with `left`, and likewise for
+   `right`, so there is no ambiguity to resolve here. */
+
+@keyframes motion-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.dash.is-animating .mover-bar {
+  animation: motion-bar-grow var(--dur-long) var(--ease-out) both;
+  /* --i lives on the parent .mover, not on the bar itself — a custom
+     property set on an ancestor is visible to any descendant that does not
+     redeclare it, so this reads the parent row's index by inheritance. */
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.dash.is-animating .mover-bar[style*="left"]  { transform-origin: left; }
+.dash.is-animating .mover-bar[style*="right"] { transform-origin: right; }
+
+/* -------------------------------------------------------------- table rows
+   Both <table>s on the page (.dtable) get the same settle: the trend
+   table's data-details disclosure and the coverage table. motion.js indexes
+   every tbody row on the page in a single pass (see its header comment), so
+   if a reader already has the trend disclosure open, the two tables settle
+   as one continuous sequence instead of each restarting at --i: 0. */
+
+@keyframes motion-row-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dash.is-animating .dtable tbody tr {
+  /* 6px, like the KPI tile's 10px above, is the contract's own figure for
+     this nudge rather than a spacing-scale step. */
+  animation: motion-row-in var(--dur-long) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+/* ------------------------------------------------------------- trend chart
+   The current-year bars already rise via the inline `bar-rise` animation
+   charts.js applies to each <rect> itself — left exactly as it is, per the
+   contract.
+
+   What is new here is the prior-year LINE. B1 gives the polyline
+   `pathLength="1"`, which lets stroke-dasharray/-dashoffset be expressed on
+   a normalised 0-1 scale no matter how long the line actually is on screen.
+   `stroke-dasharray: 1` draws one dash exactly as long as the whole line
+   with no gap after it; animating stroke-dashoffset from 1 (that single
+   dash pushed one full length down the path, so none of it overlaps the
+   visible line — nothing shows) to 0 (fully seated) reads as the line being
+   drawn from its first point to its last.
+
+   Only .line-prior ever gets dasharray/dashoffset set, and only while
+   .is-animating is present. Outside that class both properties are simply
+   unset, which SVG treats as "no dashing" — an ordinary, fully-drawn line.
+   That is the whole trick for satisfying "default state is final" here:
+   there is nothing to clean up when the class comes off, because the rule
+   that draws the line in never applies outside it in the first place. */
+
+@keyframes motion-line-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.dash.is-animating .line-prior {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: motion-line-draw 900ms var(--ease-out) 300ms forwards;
+}
+
+/* The dots land just before the line's draw-in reaches them (1050ms, versus
+   the line finishing at 1200ms), so the last dot's fade-in and the line's
+   arrival read as the same moment rather than the dots visibly trailing the
+   line by a beat. */
+@keyframes motion-dot-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dash.is-animating .dot-prior {
+  animation: motion-dot-in var(--dur-short) var(--ease-out) 1050ms both;
+}
