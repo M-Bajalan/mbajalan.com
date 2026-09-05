@@ -132,12 +132,19 @@
     });
   }
 
-  /* ------------------------------------------------------- trend chart */
+  /* ------------------------------------------------------- trend chart
+     trendScope drills the chart down to one distributor. null means "all
+     distributors", which is also the only state the total coverage row can
+     ever put the chart back into — the total is a sum, not a place you can
+     drill into further. */
 
   var trendMeasure = 'value';
+  var trendScope = null;
 
   function trendSeries() {
-    var s = D.trend[trendMeasure];
+    var src = trendScope ? D.trend.byDistributor[trendScope] : D.trend;
+    var s = src[trendMeasure];
+    var base = trendMeasure === 'value' ? 'Net sales value' : 'Volume in cartons';
     return {
       current: s.current,
       prior: s.prior,
@@ -145,8 +152,22 @@
         return fmtInt.format(Math.round(v)) + ' ctn';
       },
       axis: trendMeasure === 'value' ? compact : compactQty,
-      name: trendMeasure === 'value' ? 'Net sales value' : 'Volume in cartons'
+      name: (trendScope ? trendScope + ' — ' : '') + base
     };
+  }
+
+  /* Caption text is one function so the measure toggle and the drill
+     buttons cannot describe the chart two different ways. */
+  function trendCaption() {
+    var base = trendMeasure === 'value'
+      ? 'Net sales value by month, current year against last.'
+      : 'Volume in cartons by month, current year against last.';
+    return trendScope ? (trendScope + ' — ' + base) : base;
+  }
+
+  function updateTrendCaption() {
+    var cap = document.querySelector('[data-trend-caption]');
+    if (cap) cap.textContent = trendCaption();
   }
 
   function niceTicks(max, count) {
@@ -233,7 +254,12 @@
       return (padL + slot * i + slot / 2) + ',' + y(v);
     }).join(' ');
     svg.appendChild(el('polyline', {
-      points: pts, class: 'line-prior', fill: 'none', 'aria-hidden': 'true'
+      points: pts, class: 'line-prior', fill: 'none', 'aria-hidden': 'true',
+      /* Normalises the line's length to 1 regardless of how many points or
+         how much distance it actually spans, so motion.css can animate
+         stroke-dasharray/-dashoffset between 0 and 1 without knowing the
+         drawn geometry. Pure CSS/SVG feature; draws nothing on its own. */
+      pathLength: '1'
     }));
     s.prior.forEach(function (v, i) {
       svg.appendChild(el('circle', {
@@ -276,11 +302,14 @@
     var m = D.meta.months[i];
     var cur = s.current[i];
     var pri = s.prior[i];
+    /* Scoped state names itself first, so a screen reader landing on any one
+       month still knows which distributor's figures it is hearing. */
+    var prefix = trendScope ? trendScope + ', ' : '';
     if (cur == null) {
-      return m + ', ' + D.meta.currentLabel.toLowerCase() + ': no data yet. ' +
+      return prefix + m + ', ' + D.meta.currentLabel.toLowerCase() + ': no data yet. ' +
         m + ', ' + D.meta.priorLabel.toLowerCase() + ': ' + s.fmt(pri) + '.';
     }
-    return m + ', ' + D.meta.currentLabel.toLowerCase() + ': ' + s.fmt(cur) +
+    return prefix + m + ', ' + D.meta.currentLabel.toLowerCase() + ': ' + s.fmt(cur) +
       ', against ' + s.fmt(pri) + ' the same month ' +
       D.meta.priorLabel.toLowerCase() + ', ' + fmtPct1(pctChange(cur, pri)) + '.';
   }
@@ -352,6 +381,11 @@
 
   /* ------------------------------------------------------- coverage table */
 
+  /* Every distributor's <th> button, in table order, so a click can mark
+     itself pressed and every sibling not — one flat list beats walking the
+     DOM back up from the event target. */
+  var drillButtons = [];
+
   function renderCoverage() {
     var body = document.querySelector('[data-coverage]');
     if (!body) return;
@@ -360,8 +394,20 @@
       var sig = signal(c.deltaPp, 1);
       var tr = h('tr');
 
-      var th = h('th', null, c.distributor);
+      var th = h('th');
       th.setAttribute('scope', 'row');
+      /* A real button, not a click handler on the cell: keyboard-reachable
+         and announced as interactive, same as any other control on the
+         page — a coverage row you can only drill into with a mouse would
+         be a screen-reader dead end. */
+      var drillBtn = h('button', 'drill', c.distributor);
+      drillBtn.type = 'button';
+      drillBtn.setAttribute('aria-pressed', 'false');
+      drillBtn.addEventListener('click', function () {
+        setTrendScope(c.distributor, drillBtn);
+      });
+      drillButtons.push(drillBtn);
+      th.appendChild(drillBtn);
       tr.appendChild(th);
 
       tr.appendChild(h('td', null, c.region));
@@ -402,6 +448,52 @@
     st.appendChild(h('span', null, SIGNAL_WORD[sig]));
     tr.appendChild(st);
     body.appendChild(tr);
+  }
+
+  /* --------------------------------------------------------- the drill
+     One state change, three consequences: redraw the chart against the
+     scoped series, redraw its table, restate the caption. Nothing here
+     touches the coverage table itself — that already shows every
+     distributor; the drill only changes what the CHART is scoped to. */
+
+  function setTrendScope(name, activeBtn) {
+    trendScope = name;
+    drillButtons.forEach(function (b) {
+      b.setAttribute('aria-pressed', b === activeBtn ? 'true' : 'false');
+    });
+    var reset = document.querySelector('[data-trend-reset]');
+    if (reset) reset.hidden = false;
+    drawTrend(true);
+    renderTrendTable();
+    updateTrendCaption();
+  }
+
+  function resetTrendScope() {
+    trendScope = null;
+    drillButtons.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    var reset = document.querySelector('[data-trend-reset]');
+    if (reset) reset.hidden = true;
+    drawTrend(true);
+    renderTrendTable();
+    updateTrendCaption();
+  }
+
+  /* The reset control only makes sense once something is drilled into, so
+     it is built hidden and revealed by setTrendScope — never shown by
+     markup, since with no drill active there is nothing to reset. Inserted
+     ahead of the measure toggle rather than appended, so the panel-head
+     reads left to right as "what you are looking at, how to get back,
+     which measure" — the same order the state changes happen in. */
+  function ensureTrendReset() {
+    if (document.querySelector('[data-trend-reset]')) return;
+    var measureGroup = document.querySelector('[data-measure]');
+    if (!measureGroup || !measureGroup.parentNode) return;
+    var btn = h('button', 'drill', 'All distributors');
+    btn.type = 'button';
+    btn.setAttribute('data-trend-reset', '');
+    btn.hidden = true;
+    btn.addEventListener('click', resetTrendScope);
+    measureGroup.parentNode.insertBefore(btn, measureGroup);
   }
 
   /* ------------------------------------------- the chart's data table
@@ -447,12 +539,7 @@
       });
       drawTrend(true);          /* the measure changed, so force the redraw */
       renderTrendTable();
-      var cap = document.querySelector('[data-trend-caption]');
-      if (cap) {
-        cap.textContent = trendMeasure === 'value'
-          ? 'Net sales value by month, current year against last.'
-          : 'Volume in cartons by month, current year against last.';
-      }
+      updateTrendCaption();
     });
   }
 
@@ -498,6 +585,7 @@
     renderKpis();
     renderMovers();
     renderCoverage();
+    ensureTrendReset();
     drawTrend(true);
     renderTrendTable();
     wireMeasureToggle();

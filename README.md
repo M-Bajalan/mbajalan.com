@@ -1,7 +1,7 @@
 # mbajalan.com
 
 Source for my personal site. Hand-written HTML and CSS, no build step, no dependencies, no
-framework, and no external network requests of any kind — no webfonts, no CDN, no analytics.
+framework, and no third-party network requests — one self-hosted typeface (Newsreader, SIL Open Font License, in `fonts/`), no CDN, no analytics.
 
 ## Pages
 

@@ -1,3 +1,5 @@
+/* Hallmark · macrostructure: Long Document · theme: Newsprint · nav: N6 masthead · footer: Ft1 (reduced)
+ * genre: editorial · enrichment: none (typography only) · anchor hue: rust ~32° · stamped 2026-08-16 (audit) */
 /* ==========================================================================
    Reset — minimal, print-aware
    ========================================================================== */
@@ -17,6 +19,14 @@ body {
   overflow-x: clip;
   min-width: 0;
   margin: 0;
+}
+
+/* The hidden attribute must win over any display rule an element carries —
+   several controls on this site ship hidden and are revealed by script, and
+   an author `display: flex` would otherwise quietly out-rank the browser's
+   own [hidden] rule and show them, empty and dead, with JavaScript off. */
+[hidden] {
+  display: none !important;
 }
 
 img,
@@ -134,6 +144,11 @@ a:active {
 .theme-toggle:hover {
   color: var(--color-accent);
   border-color: var(--color-rule);
+}
+
+.theme-toggle:active {
+  color: var(--color-accent-2);
+  border-color: var(--color-rule-strong);
 }
 
 .theme-toggle:focus-visible {

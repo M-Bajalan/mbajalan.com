@@ -1,0 +1,207 @@
+/* ==========================================================================
+   Demo dashboard — views (executive / analyst / phone)
+   Loaded only by pages under /demo/, right after dashboard.css.
+
+   Analyst is the page exactly as dashboard.css already draws it, so analyst
+   needs no rules here at all — it is what you get with no data-view
+   attribute on <html> at all (views.js and the page's head snippet agree on
+   that: "no attribute" IS analyst, not a fourth state).
+
+   Executive and phone are both READS of the same DOM, not second layouts:
+   - Executive hides the narrative and the drill-down panels and turns the
+     KPI tiles up, then adds one sentence (.exec-flag) pointing at the row
+     most worth a call. Nothing is removed from the page, so the charts and
+     the drill-down wiring behind the hidden panels keep running — switching
+     back to analyst costs nothing.
+   - Phone does not re-lay the page out for a small screen; it constrains
+     the SAME .dash to a 390px container (dashboard.css made .dash a query
+     container for exactly this) and drops it inside a CSS phone frame
+     (.device, built by views.js). The container queries in dashboard.css
+     react to that 390px the same way they would react to a real phone.
+
+   Both are gated purely on document.documentElement.dataset.view, which
+   only JavaScript ever sets. With JavaScript off the attribute never
+   exists, so the reader gets the full analyst page — never a dead view-bar
+   or a half-applied view. That is also why the executive/phone rules below
+   read as pure CSS toggles: no transition lives here on purpose. Motion.js
+   owns the re-entrance animation when a view actually changes.
+   ========================================================================== */
+
+/* ------------------------------------------------------------- view bar */
+
+.view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
+  /* Spacing above/below comes for free from ".dash > * + *" in
+     dashboard.css, same as every other direct child of .dash. */
+}
+
+.view-bar > .kpi-label {
+  margin: 0;
+}
+
+/* ------------------------------------------------------- executive view
+   One function decided what "good" means on this page (charts.js's
+   signal()); this view decides what is worth SHOWING, and asks the same
+   coverage data the table already renders — never a second opinion. */
+
+html[data-view="executive"] .dash > .prose-intro:not(.prose-intro-hero),
+html[data-view="executive"] section[aria-labelledby="movers-h"],
+html[data-view="executive"] section[aria-labelledby="cov-h"],
+html[data-view="executive"] .dash-note,
+html[data-view="executive"] [data-measure] {
+  display: none;
+}
+
+/* The executive tile carries a bigger number -- and the number has to fit the
+   TILE, not the window. A viewport-based clamp cannot know that a 1280px
+   laptop gives each of four tiles ~240px of room, which is where the old
+   ceiling broke "$5,690,536" across two lines mid-digit. So the size is
+   taken from the dashboard's own container width (cqi), in three bands that
+   follow the grid's own column breaks, and each band was sized against the
+   longest figure the page can show ("347,935 ctn", eleven mono characters
+   at ~0.6em each) with room to spare. Mid-digit wrapping is forbidden
+   outright: if a figure ever cannot fit, it breaks at the unit's space. */
+html[data-view="executive"] .kpi-value {
+  font-size: clamp(1.6rem, 3.6cqi - 0.35rem, 2.6rem);   /* four columns */
+  overflow-wrap: normal;
+}
+
+@container dash (max-width: 60rem) {
+  html[data-view="executive"] .kpi-value {
+    font-size: clamp(1.75rem, 7cqi - 0.5rem, 2.6rem);   /* two columns */
+  }
+}
+
+@container dash (max-width: 30rem) {
+  html[data-view="executive"] .kpi-value {
+    font-size: clamp(1.75rem, 12cqi - 0.5rem, 2.6rem);  /* one column */
+  }
+}
+
+.exec-flag {
+  display: none;
+}
+
+html[data-view="executive"] .exec-flag {
+  display: block;
+}
+
+.exec-flag-text {
+  margin: var(--space-2xs) 0 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+}
+
+.exec-flag-text .delta-mark {
+  margin-inline-end: var(--space-2xs);
+}
+
+.exec-flag-text strong {
+  color: var(--color-ink-2);
+}
+
+/* ------------------------------------------------------------ phone view
+   The frame is chrome around the SAME .dash — views.js moves .dash inside
+   .device rather than cloning it, so this is the one dashboard, previewed
+   at phone width, not a second one built to match. It is a plain bezel on
+   purpose: no drawn island, no home bar -- ornaments that imitate hardware
+   are the surest sign of a page pretending, and the width is the point. */
+
+html[data-view="phone"] .dash > .prose-intro:not(.prose-intro-hero),
+html[data-view="phone"] .dash-note {
+  display: none;
+}
+
+/* The lead -- title, demo nav and the view bar -- sits above the frame at
+   the page's own width, so the phone holds only what a phone would. It
+   borrows .dash's measure and rhythm so nothing shifts when the frame goes
+   up or comes down. */
+.dash-lead {
+  width: 100%;
+  max-width: var(--measure-wide);
+  margin-inline: auto;
+  padding-block: var(--space-xl) 0;
+}
+
+.dash-lead > * + * { margin-top: var(--space-xl); }
+.dash-lead .prose-intro { max-width: var(--measure); }
+.dash-lead .prose-intro p { margin: 0 0 var(--space-md); }
+
+html[data-view="phone"] .device { margin-block: var(--space-xl) var(--space-3xl); flex: none; }
+
+/* styles.css lays <main> out as a flex ROW to centre the porch's prose
+   column. With the lead hoisted out of the frame there are two children
+   here, and a row would seat them side by side and squeeze the phone. Stack
+   them for this view only. */
+html[data-view="phone"] main {
+  flex-direction: column;
+  align-items: center;
+}
+
+.device {
+  position: relative;
+  margin-inline: auto;
+  inline-size: min(390px, 100%);
+  block-size: min(820px, 88vh);
+  /* Hardware is not themed: the bezel is not one of the light/dark/terminal
+     surfaces on the page, it is the thing the page is being read on. This
+     is the one raw colour on the whole site — every other value here is a
+     token from tokens.css. */
+  border: var(--space-sm) solid oklch(18% 0.01 60);
+  border-radius: 2.75rem;
+  background: oklch(18% 0.01 60);
+  overflow: hidden;
+}
+
+.device .dash {
+  inline-size: 390px;
+  max-width: 390px;
+  block-size: 100%;
+  margin: 0;
+  padding-inline: var(--space-md);
+  /* padding-block keeps dashboard.css's own space-xl top gap, which already
+     clears the island pill below — no phone-specific top offset needed. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--color-paper);
+  border-radius: calc(2.75rem - var(--space-sm));
+}
+
+/* Below this, the reader is already looking at a phone — the preview is
+   redundant, and views.js falls back to analyst when it is selected. */
+@media (max-width: 40rem) {
+  .view-bar [data-value="phone"] {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------- print
+   A phone bezel and a view switcher are screen ideas; print the dashboard
+   itself, the same as every other view, on paper. */
+
+@media print {
+  .view-bar {
+    display: none;
+  }
+
+  .device {
+    border: 0;
+    background: none;
+    inline-size: auto;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .device .dash {
+    inline-size: auto;
+    max-width: 100%;
+    block-size: auto;
+    overflow: visible;
+    background: none;
+    border-radius: 0;
+  }
+}

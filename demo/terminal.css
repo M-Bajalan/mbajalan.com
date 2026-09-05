@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Terminal theme — phosphor override
+   --------------------------------------------------------------------------
+   Loaded ONLY by pages under /demo/ (see the <link> in demo/sales/index.html
+   and demo/margin/index.html). A THIRD theme choice next to light/dark, so it
+   cannot use tokens.css's light-dark() trick — there is no "light half" of a
+   phosphor terminal. Instead it overrides every colour token directly, once
+   each, under a single attribute selector. `:root[data-theme="terminal"]`
+   has higher specificity than the bare `:root` block tokens.css declares
+   everything on, so it wins regardless of load order.
+
+   Character: a CRT that has been on for hours. Near-black paper with a faint
+   green cast; green text in four weights; an AMBER accent for links and the
+   current-period series (the one thing on the page meant to pull the eye);
+   a dim, DESATURATED green "ghost" trace for the prior-period series rather
+   than a second hue; a red-orange phosphor for bad. No gradients, no glow,
+   no scanlines — the rest of the site is flat colour fields, and this theme
+   keeps that promise instead of doing a costume version of a terminal.
+
+   Every ratio quoted below was MEASURED the same way tokens.css measures its
+   own: oklch -> oklab -> linear sRGB -> WCAG relative luminance. This theme
+   has THREE backgrounds in close range (paper, paper-2, surface) rather than
+   tokens.css's one-paper-tone-per-mode, so every text tier is checked
+   against all three and the ratios are printed paper / paper-2 / surface, in
+   that order. The three status marks were additionally run through a
+   Vienot/Brettel/Mollon-style protanopia / deuteranopia / tritanopia
+   simulation and checked for pairwise separation in OKLab space — see the
+   note at the foot of this file. Gate script and method:
+   scratchpad/terminal_contrast.py (2026-09-02).
+
+   No component rules were added beyond this one token block. Every place a
+   KPI tile, mover bar or coverage dot gets its colour already reads one of
+   the tokens below, so the mono font swap plus these overrides is the whole
+   theme — nothing in dashboard.css, charts.js or the other demo files
+   assumes a specific palette. See the note at the foot of this file for the
+   one thing that was checked and left alone on purpose (the accent/focus
+   overlap on the segmented control).
+   ========================================================================== */
+
+:root[data-theme="terminal"] {
+  color-scheme: dark;
+
+  /* === Colour — Phosphor =================================================
+     Near-black, faint green cast. paper < paper-2 < surface, the same
+     ordering tokens.css's own dark theme uses — a footer band and a card
+     both need to read as slightly RAISED off the page, not as three
+     unrelated greys picked independently.
+     ====================================================================== */
+
+  --color-paper:   oklch(13%   0.020 152);
+  --color-paper-2: oklch(16%   0.021 152);   /* footer band */
+  --color-surface: oklch(18.5% 0.022 152);   /* cards, panels */
+
+  /* Rules — decorative dividers, deliberately below 3:1, same reasoning
+     tokens.css states for its own hairlines: WCAG 1.4.11 scopes non-text
+     contrast to UI components and MEANINGFUL graphics, and a hairline is
+     neither. Measured 1.5:1 / 1.4:1 / 1.4:1 and 2.0:1 / 2.0:1 / 1.9:1. */
+  --color-rule:        oklch(30% 0.030 152);
+  --color-rule-strong: oklch(38% 0.035 152);      /* double rule under masthead */
+
+  /* Text tiers — all measured >= 4.5:1 on paper, paper-2 AND surface */
+  --color-neutral: oklch(63% 0.085 152);  /* meta, axis labels   6.0:1 / 5.7:1 / 5.5:1 */
+  --color-muted:   oklch(69% 0.090 152);  /* nav links           7.5:1 / 7.2:1 / 7.0:1 */
+  --color-ink:     oklch(79% 0.095 152);  /* body               10.8:1 / 10.4:1 / 10.0:1 */
+  --color-ink-2:   oklch(89% 0.070 152);  /* headings           14.8:1 / 14.3:1 / 13.7:1 */
+
+  /* Accent — the one warm hue in the theme: amber, for links and (per the
+     shared build contract) the current-period series. */
+  --color-accent:   oklch(76% 0.150 74);  /* links               9.1:1 / 8.8:1 / 8.4:1 */
+  --color-accent-2: oklch(85% 0.135 78);  /* hover              12.5:1 / 12.1:1 / 11.6:1 */
+
+  --color-focus:     oklch(76% 0.150 74); /* = accent            9.1:1 / 8.8:1 / 8.4:1 */
+  --color-selection: oklch(32% 0.090 75); /* ::selection bg; ink-2 text on it: 9.5:1 */
+
+  /* === Data colour ========================================================
+     Same two-series logic tokens.css uses: current takes the accent, prior
+     recedes. Here "recedes" means a dim, DESATURATED green rather than a
+     second hue, so the prior trace reads as a ghost of the same phosphor
+     instead of a third colour family competing with the green text and the
+     amber accent for attention.
+     ====================================================================== */
+  --series-current: oklch(76% 0.150 74);  /* = accent            9.1:1 / 8.8:1 / 8.4:1 */
+  --series-prior:   oklch(55% 0.025 152); /* non-text ink        4.2:1 / 4.0:1 / 3.9:1 */
+
+  /* Status MARKS — dots and fills, so 3:1 is the bar, same as tokens.css.
+     They are never the only signal here either: every status still carries
+     a WORD and a shape (dashboard.css's is-filled / is-half / is-open), so
+     colour stays the fast-scan layer, not the meaning. */
+  --mark-good: oklch(62% 0.170 152);  /*  6.0:1 / 5.8:1 / 5.5:1 */
+  --mark-warn: oklch(92% 0.140  94);  /* 15.7:1 / 15.2:1 / 14.5:1 */
+  --mark-bad:  oklch(58% 0.195  28);  /*  4.3:1 / 4.1:1 / 3.9:1 */
+
+  /* Status TEXT — deltas. Full 4.5:1, tuned for legibility rather than CVD
+     separation, same rationale tokens.css gives: the +/- sign is already a
+     redundant encoding here. */
+  --text-good: oklch(78% 0.130 152);  /* 10.6:1 / 10.2:1 / 9.8:1 */
+  --text-bad:  oklch(72% 0.170  27);  /*  7.5:1 / 7.2:1 / 7.0:1 */
+
+  /* === Typography =========================================================
+     The whole theme goes mono, display and body alike — the --font-outlier
+     stack tokens.css already ships (JetBrains Mono, falling back to the
+     reader's system mono). Nothing new is requested; this is a face swap,
+     not a font load. ====================================================== */
+  --font-display: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-body:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Colour-vision-deficiency check — the three status marks only
+
+   Same three marks, run through a Vienot/Brettel/Mollon (1999) linear-RGB
+   simulation for protanopia, deuteranopia and tritanopia, then compared
+   pairwise as OKLab Euclidean distance — the same "separation" metric
+   tokens.css reports for its own marks (0.21 light / 0.20 dark, worst case).
+
+     normal        good-warn 0.327   warn-bad 0.387   good-bad 0.321
+     protanopia    good-warn 0.420   warn-bad 0.235   good-bad 0.214
+     deuteranopia  good-warn 0.484   warn-bad 0.207   good-bad 0.317
+     tritanopia    good-warn 0.340   warn-bad 0.278   good-bad 0.275
+
+     worst case across all three sims and all three pairs: 0.207
+     (deuteranopia, mark-warn vs mark-bad) — in the same range as the
+     newsprint palette's own 0.20-0.21.
+
+   Full script, method and the search that landed on this hue/lightness
+   combination: scratchpad/terminal_contrast.py.
+
+   One thing checked and left alone on purpose: `--color-focus` equals
+   `--color-accent` in every theme tokens.css ships, including this one, so
+   a focus-visible outline on `.seg button.is-on` (which paints its own
+   background from --color-accent) can sit outline-on-same-hue. That is an
+   inherited property of the shared token design, not something this theme
+   introduced, and outline-offset: -2px still draws a visible ring inside
+   the button's own border, so it was left as every other theme leaves it.
+   ------------------------------------------------------------------------ */
