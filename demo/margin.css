@@ -75,7 +75,9 @@
 }
 
 .whatif-rule {
-  margin: var(--space-xs) 0 0;
+  margin: var(--space-md) 0 0;
+  padding-top: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
   font-size: var(--text-xs);
   line-height: var(--leading-snug);
   color: var(--color-neutral);
@@ -94,14 +96,19 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2xs) var(--space-sm);
-  margin: var(--space-md) 0 0;
-  padding-top: var(--space-sm);
-  border-top: var(--rule-hair) solid var(--color-rule);
+  /* Directly under the slider's own readout, whose dashed rule already
+     separates the two — so no rule of its own. Two lines are reserved, so
+     the panel does not grow and shrink under the thumb as the sentence
+     changes length. */
+  margin: var(--space-sm) 0 0;
+  min-height: calc(2 * var(--leading-snug) * var(--text-md));
   font-family: var(--font-display);
   font-size: var(--text-md);
   line-height: var(--leading-snug);
   color: var(--color-ink);
 }
+
+.verdict-line:empty { display: none; }
 
 .verdict-hint {
   font-family: var(--font-body);

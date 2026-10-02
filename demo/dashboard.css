@@ -9,6 +9,17 @@
    is wrong for a column of numbers that has to be scanned.
    ========================================================================== */
 
+/* --------------------------------------------------------- first frame
+   The page's own <head> marks the document as loading before anything is
+   painted and clears the mark once the scripts have drawn the dashboard
+   (the comment there says why). While the mark is on, nothing shows.
+   Hidden, not removed: everything is still laid out underneath, which the
+   trend chart needs, because it draws at the width it measures. */
+
+html.is-loading body > * {
+  visibility: hidden;
+}
+
 /* --------------------------------------------------------------- shell */
 
 .dash {
@@ -21,11 +32,92 @@
   width: 100%;
   max-width: var(--measure-wide);
   margin-inline: auto;
-  padding-block: var(--space-xl) var(--space-3xl);
+  /* One notch under the running head's rule, not two: the head above is
+     already a quiet line, and the page title does not need a porch. */
+  padding-block: var(--space-lg) var(--space-3xl);
 }
 
 .dash > * + * {
   margin-top: var(--space-xl);
+}
+
+/* ---------------------------------------------------------- running head
+   The front page carries the full nameplate. A dashboard is an inside page,
+   and an inside page gets a running head: the name small at the start of
+   the line, the three links and the theme switch at the end of it, the
+   double rule underneath. The nameplate stands 218px tall on a laptop, and
+   on a 1366x768 screen that alone kept the tiles below the fold.
+
+   It is set on the same measure as .dash beneath it. The side padding is
+   the page gutter until the window is wider than the dashboard, and from
+   there whatever centres 78rem — so the name starts where the tiles start
+   and the rule ends where they end.
+
+   Narrow first. On a phone the name and the links do not share a line, so
+   the links take a second one and the switch stays level with the name.
+   From 48rem, the width at which styles.css already steps the links up a
+   size, it is a single line. */
+
+.nav-mast-running {
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* The first line is as tall as the theme switch whether or not the switch
+     is there. It ships hidden and is revealed by script; without this the
+     head would stand a few pixels shorter until it was, and the whole page
+     would step down when it arrived. */
+  grid-template-rows: minmax(2.75rem, auto);
+  align-items: center;
+  justify-items: start;
+  gap: 0;
+  padding: var(--space-xs) max(var(--page-gutter), (100% - var(--measure-wide)) / 2) 0;
+  text-align: start;
+}
+
+.nav-mast-running .mast-name {
+  grid-area: 1 / 1;
+  font-size: var(--text-lg);
+}
+
+/* In the line, not pinned to the corner over it: at this size the name and
+   the switch are neighbours, and a neighbour that floats is one that lands
+   on the name the day the name gets longer. */
+.nav-mast-running .theme-toggle {
+  grid-area: 1 / 2;
+  position: static;
+}
+
+.nav-mast-running .mast-nav {
+  grid-area: 2 / 1 / auto / -1;
+}
+
+.nav-mast-running .mast-nav ul {
+  justify-content: flex-start;
+}
+
+.nav-mast-running .mast-rule {
+  grid-area: 3 / 1 / auto / -1;
+  max-width: none;
+  margin-top: var(--space-sm);
+}
+
+@media (min-width: 48rem) {
+  .nav-mast-running {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding-top: var(--space-sm);
+  }
+
+  .nav-mast-running .mast-nav {
+    grid-area: 1 / 2;
+    margin-inline-start: var(--space-lg);
+  }
+
+  .nav-mast-running .theme-toggle {
+    grid-area: 1 / 3;
+    margin-inline-start: var(--space-sm);
+  }
+
+  .nav-mast-running .mast-rule {
+    grid-row: 2;
+  }
 }
 
 .dash .prose-intro {
@@ -64,6 +156,15 @@
   font-size: var(--text-sm);
   line-height: var(--leading-snug);
   color: var(--color-neutral);
+}
+
+/* For a sentence that is longer than the line at every width: the label
+   takes its own row, always. Left to wrap, the browser has to decide whether
+   the sentence fits beside the label, and it decides twice — once in the
+   stand-in face, where it just fits, and again when the real one arrives,
+   where it does not — and the dashboard under it steps down a line. */
+.demo-banner-stacked strong {
+  flex-basis: 100%;
 }
 
 /* ------------------------------------------------------ signal encoding
@@ -482,11 +583,10 @@
 
 /* ------------------------------------------------------ drill + demo nav */
 
-/* A distributor name in the coverage table is a real button that scopes the
+/* A company name in the coverage table is a real button that scopes the
    trend chart to that one company. It is styled as a link because that is
    what it does — it takes you somewhere in the data — and kept as a button
-   because that is what it is. The reset ("All distributors") shares the
-   class: one rule, two controls, same affordance. */
+   because that is what it is. Pressing the same name again lets go. */
 .drill {
   font: inherit;
   background: none;
@@ -507,7 +607,44 @@
   outline-offset: 2px;
 }
 
-[data-trend-reset] { margin-inline-end: var(--space-sm); }
+/* The chart's own controls: which company, which measure. They sit together
+   at the end of the panel head and wrap as a pair in a narrow container. */
+.panel-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* A native select, themed through the tokens rather than rebuilt: it keeps
+   its keyboard behaviour and a phone's own picker for free. Same height as
+   the segmented control beside it. */
+.scope-select {
+  font: inherit;
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  min-height: 2.25rem;
+  padding: 0 var(--space-xs);
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.scope-select:hover { border-color: var(--color-rule-strong); }
+
+.scope-select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Filled by script. Empty, it is a rule and a gap with nothing in it, so
+   without JavaScript it does not draw at all. */
+.readout:empty { display: none; }
+
+/* The line that says which period the tiles are for. */
+.panel-sub + .kpi-grid { margin-top: var(--space-sm); }
 
 /* The line under a demo's lede that names its siblings. The current page is
    plain text, not a link to itself. */
@@ -529,7 +666,8 @@
 /* ------------------------------------------------------------- printing */
 
 @media print {
-  .seg, .readout, .data-details { display: none; }
+  .nav-mast-running { padding-top: 0; }
+  .seg, .scope-select, .readout, .data-details { display: none; }
   .panel, .kpi { border: var(--rule-hair) solid var(--color-ink); break-inside: avoid; }
   .kpi-grid { grid-template-columns: repeat(4, 1fr); }
 }

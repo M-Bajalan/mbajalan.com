@@ -49,6 +49,18 @@
   margin-top: var(--space-md);
 }
 
+/* The title, the switcher and the banner are one block of page furniture,
+   not three sections: they sit a small step apart, and the dashboard starts
+   one notch closer beneath them. Every pixel here is a pixel the tiles are
+   further from the top of the screen. */
+.prose-intro-hero + .view-bar {
+  margin-top: var(--space-md);
+}
+
+.demo-banner + section {
+  margin-top: var(--space-lg);
+}
+
 /* ------------------------------------------------------- executive view
    One function decided what "good" means on this page (charts.js's
    signal()); this view decides what is worth SHOWING, and asks the same
@@ -131,7 +143,7 @@ html[data-view="phone"] .dash-note {
   width: 100%;
   max-width: var(--measure-wide);
   margin-inline: auto;
-  padding-block: var(--space-xl) 0;
+  padding-block: var(--space-lg) 0;
 }
 
 .dash-lead > * + * { margin-top: var(--space-xl); }
@@ -175,8 +187,10 @@ html[data-view="phone"] main {
   block-size: 100%;
   margin: 0;
   padding-inline: var(--space-md);
-  /* padding-block keeps dashboard.css's own space-xl top gap; the rounded
-     corners of the frame need about that much clearance anyway. */
+  /* The page itself starts one notch under the running head. Inside the
+     frame the first line needs more than that: the rounded corners take
+     about this much before the screen is its full width. */
+  padding-block-start: var(--space-xl);
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--color-paper);

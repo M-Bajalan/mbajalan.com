@@ -30,8 +30,19 @@
   /* ---------------------------------------------------------------- format */
 
   var fmtInt = new Intl.NumberFormat('en-US');
-  var fmtPct1 = function (v) { return (v > 0 ? '+' : '') + v.toFixed(1) + '%'; };
-  var fmtPp = function (v) { return (v > 0 ? '+' : '') + v.toFixed(1) + ' pp'; };
+  /* Signed figures. The sign is a real minus (U+2212), not a hyphen: it is
+     as wide as the plus it sits opposite, and it is read aloud as "minus".
+     A value that rounds to zero carries no sign at all — "-0.0%" is a
+     rounding artefact, not a decline. */
+  function signed(v, unit) {
+    /* toFixed on the magnitude, so the digits are exactly the ones this page
+       has always shown; only the sign in front of them changes. */
+    var digits = Math.abs(v).toFixed(1);
+    if (parseFloat(digits) === 0) return '0.0' + unit;
+    return (v > 0 ? '+' : '−') + digits + unit;
+  }
+  var fmtPct1 = function (v) { return signed(v, '%'); };
+  var fmtPp = function (v) { return signed(v, ' pp'); };
 
   function money(v) {
     return '$' + fmtInt.format(Math.round(v));
@@ -410,7 +421,11 @@
       drillBtn.type = 'button';
       drillBtn.setAttribute('aria-pressed', 'false');
       drillBtn.addEventListener('click', function () {
-        setTrendScope(c.distributor, drillBtn);
+        /* A pressed toggle un-presses: a second click on the same company
+           puts the chart back to all of them. */
+        if (trendScope === c.distributor) { setTrendScope(null); return; }
+        setTrendScope(c.distributor);
+        showTrend();
       });
       drillButtons.push(drillBtn);
       th.appendChild(drillBtn);
@@ -439,7 +454,7 @@
     var t = D.coverageTotal;
     var sig = signal(t.deltaPp, 1);
     var tr = h('tr', 'is-total is-' + sig);
-    var th = h('th', null, 'All distributors');
+    var th = h('th', null, 'All trading companies');
     th.setAttribute('scope', 'row');
     tr.appendChild(th);
     tr.appendChild(h('td', null, '—'));
@@ -462,44 +477,75 @@
      touches the coverage table itself — that already shows every
      distributor; the drill only changes what the CHART is scoped to. */
 
-  function setTrendScope(name, activeBtn) {
-    trendScope = name;
+  function setTrendScope(name) {
+    trendScope = name || null;
     drillButtons.forEach(function (b) {
-      b.setAttribute('aria-pressed', b === activeBtn ? 'true' : 'false');
+      b.setAttribute('aria-pressed', b.textContent === trendScope ? 'true' : 'false');
     });
-    var reset = document.querySelector('[data-trend-reset]');
-    if (reset) reset.hidden = false;
+    var sel = document.querySelector('[data-trend-scope]');
+    if (sel) sel.value = trendScope || '';
     drawTrend(true);
     renderTrendTable();
     updateTrendCaption();
   }
 
-  function resetTrendScope() {
-    trendScope = null;
-    drillButtons.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
-    var reset = document.querySelector('[data-trend-reset]');
-    if (reset) reset.hidden = true;
-    drawTrend(true);
-    renderTrendTable();
-    updateTrendCaption();
+  /* The coverage table sits well below the chart it scopes. Changing a chart
+     the reader cannot see is a click that appears to do nothing — so a click
+     in the table brings the chart into view, and puts focus on the chart's
+     own scope control, which is also where the choice is changed or undone. */
+  function showTrend() {
+    var host = document.querySelector('[data-trend]');
+    var panel = host && host.closest ? host.closest('section') : null;
+    if (!panel) return;
+    var how = REDUCED ? 'auto' : 'smooth';
+    var dash = panel.closest('.dash');
+    if (dash && dash.parentNode && dash.parentNode.classList.contains('device')) {
+      /* Inside the phone frame the dashboard is its own scroll box. Move
+         that box, not the page around it — the frame should stay put. */
+      dash.scrollTo({
+        top: dash.scrollTop + panel.getBoundingClientRect().top - dash.getBoundingClientRect().top - 16,
+        behavior: how
+      });
+    } else {
+      panel.scrollIntoView({ behavior: how, block: 'start' });
+    }
+    var sel = document.querySelector('[data-trend-scope]');
+    if (sel) {
+      try { sel.focus({ preventScroll: true }); } catch (e) { sel.focus(); }
+    }
   }
 
-  /* The reset control only makes sense once something is drilled into, so
-     it is built hidden and revealed by setTrendScope — never shown by
-     markup, since with no drill active there is nothing to reset. Inserted
-     ahead of the measure toggle rather than appended, so the panel-head
-     reads left to right as "what you are looking at, how to get back,
-     which measure" — the same order the state changes happen in. */
-  function ensureTrendReset() {
-    if (document.querySelector('[data-trend-reset]')) return;
+  /* The scope control lives ON the chart, beside the measure toggle: a
+     control belongs with the thing it changes. The company names in the
+     coverage table are a second way to the same state, not the only one.
+     Built here rather than written into the page, so with JavaScript off
+     there is no dropdown that does nothing — the same idiom as the measure
+     toggle, which ships hidden. */
+  function ensureTrendScope() {
+    if (document.querySelector('[data-trend-scope]')) return;
     var measureGroup = document.querySelector('[data-measure]');
-    if (!measureGroup || !measureGroup.parentNode) return;
-    var btn = h('button', 'drill', 'All distributors');
-    btn.type = 'button';
-    btn.setAttribute('data-trend-reset', '');
-    btn.hidden = true;
-    btn.addEventListener('click', resetTrendScope);
-    measureGroup.parentNode.insertBefore(btn, measureGroup);
+    if (!measureGroup || !measureGroup.parentNode || !D.trend.byDistributor) return;
+
+    var tools = h('div', 'panel-tools');
+    measureGroup.parentNode.insertBefore(tools, measureGroup);
+
+    var sel = h('select', 'scope-select');
+    sel.setAttribute('data-trend-scope', '');
+    sel.setAttribute('aria-label', 'Trading company shown in the chart');
+    var all = h('option', null, 'All trading companies');
+    all.value = '';
+    sel.appendChild(all);
+    D.coverage.forEach(function (c) {
+      var o = h('option', null, c.distributor);
+      o.value = c.distributor;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () {
+      setTrendScope(sel.value || null);
+    });
+
+    tools.appendChild(sel);
+    tools.appendChild(measureGroup);
   }
 
   /* ------------------------------------------- the chart's data table
@@ -591,7 +637,7 @@
     renderKpis();
     renderMovers();
     renderCoverage();
-    ensureTrendReset();
+    ensureTrendScope();
     drawTrend(true);
     renderTrendTable();
     wireMeasureToggle();

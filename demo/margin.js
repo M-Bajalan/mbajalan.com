@@ -32,8 +32,19 @@
   /* ---------------------------------------------------------------- format */
 
   var fmtInt = new Intl.NumberFormat('en-US');
-  var fmtPct1 = function (v) { return (v > 0 ? '+' : '') + v.toFixed(1) + '%'; };
-  var fmtPp = function (v) { return (v > 0 ? '+' : '') + v.toFixed(1) + ' pp'; };
+  /* Signed figures. The sign is a real minus (U+2212), not a hyphen: it is
+     as wide as the plus it sits opposite, and it is read aloud as "minus".
+     A value that rounds to zero carries no sign at all — "-0.0%" is a
+     rounding artefact, not a decline. */
+  function signed(v, unit) {
+    /* toFixed on the magnitude, so the digits are exactly the ones this page
+       has always shown; only the sign in front of them changes. */
+    var digits = Math.abs(v).toFixed(1);
+    if (parseFloat(digits) === 0) return '0.0' + unit;
+    return (v > 0 ? '+' : '−') + digits + unit;
+  }
+  var fmtPct1 = function (v) { return signed(v, '%'); };
+  var fmtPp = function (v) { return signed(v, ' pp'); };
 
   function money(v) {
     return '$' + fmtInt.format(Math.round(v));

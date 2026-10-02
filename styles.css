@@ -246,6 +246,23 @@ main {
    thread opens with one, so a reader scanning in eight seconds still picks up
    networks / SAP / data / AI. */
 
+/* The proof, one line under the opening. The story below is long on purpose;
+   this is for the reader who wants to see the work before reading about it.
+   The Work section used to start two and a half screens down, on a laptop
+   and on a phone alike. */
+.lede:has(+ .see-work) {
+  margin-bottom: var(--space-md);
+}
+
+.prose > .see-work {
+  margin-bottom: var(--space-2xl);
+  /* On a phone this is two lines. Balanced, they break in the middle of the
+     sentence rather than wherever the first line happens to run out — which
+     is a different word in the stand-in face than in the real one, so a
+     word used to hop lines when the typeface arrived. */
+  text-wrap: balance;
+}
+
 .run-in {
   font-variant: small-caps;
   font-weight: 600;
@@ -496,7 +513,10 @@ pre.output {
     padding-top: 0;
   }
 
-  .mast-nav {
+  /* Neither does anything on paper: the links go nowhere and the theme
+     switch has nothing to switch. */
+  .mast-nav,
+  .theme-toggle {
     display: none;
   }
 
