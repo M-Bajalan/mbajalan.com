@@ -42,6 +42,13 @@
   margin: 0;
 }
 
+/* The banner zeroes its own top margin, so when the bar sits directly above
+   it the two touched. Related chrome, so a small gap rather than the page's
+   full section rhythm. */
+.view-bar + .demo-banner {
+  margin-top: var(--space-md);
+}
+
 /* ------------------------------------------------------- executive view
    One function decided what "good" means on this page (charts.js's
    signal()); this view decides what is worth SHOWING, and asks the same
@@ -145,7 +152,12 @@ html[data-view="phone"] main {
 .device {
   position: relative;
   margin-inline: auto;
-  inline-size: min(390px, 100%);
+  /* The SCREEN is 390px, so the bezel has to sit outside that measure. With
+     the page's border-box sizing the 12px border came out of the 390 and the
+     dashboard inside — still 390 wide — ran 24px past the right edge, where
+     the frame cut it off. */
+  box-sizing: content-box;
+  inline-size: min(390px, calc(100% - 2 * var(--space-sm)));
   block-size: min(820px, 88vh);
   /* Hardware is not themed: the bezel is not one of the light/dark/terminal
      surfaces on the page, it is the thing the page is being read on. This
@@ -163,8 +175,8 @@ html[data-view="phone"] main {
   block-size: 100%;
   margin: 0;
   padding-inline: var(--space-md);
-  /* padding-block keeps dashboard.css's own space-xl top gap, which already
-     clears the island pill below — no phone-specific top offset needed. */
+  /* padding-block keeps dashboard.css's own space-xl top gap; the rounded
+     corners of the frame need about that much clearance anyway. */
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--color-paper);

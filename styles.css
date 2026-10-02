@@ -434,6 +434,15 @@ pre.output {
     padding-top: var(--space-xl);
   }
 
+  /* At these widths the name is nearly as wide as the screen, so the theme
+     button's column runs straight through it — measured: the two boxes
+     overlapped at every width from 360 to 414. Tuck the button into the top
+     corner, where its icon clears the capitals. */
+  .theme-toggle {
+    inset-block-start: 0;
+    inset-inline-end: var(--space-xs);
+  }
+
   .prose {
     padding-block: var(--space-xl) var(--space-2xl);
   }

@@ -392,7 +392,13 @@
 
     D.coverage.forEach(function (c) {
       var sig = signal(c.deltaPp, 1);
-      var tr = h('tr');
+      /* The ROW carries the signal class, not only the change figure. The
+         status dot takes both its colour and its fill from --sig-mark, which
+         is inherited; with the class on nothing above it, every dot fell
+         back to the same hollow grey ring, whatever the word beside it said.
+         That was live from the first version of this table — the class
+         names were right in the DOM, so nothing but looking at it showed. */
+      var tr = h('tr', 'is-' + sig);
 
       var th = h('th');
       th.setAttribute('scope', 'row');
@@ -432,7 +438,7 @@
 
     var t = D.coverageTotal;
     var sig = signal(t.deltaPp, 1);
-    var tr = h('tr', 'is-total');
+    var tr = h('tr', 'is-total is-' + sig);
     var th = h('th', null, 'All distributors');
     th.setAttribute('scope', 'row');
     tr.appendChild(th);

@@ -270,8 +270,15 @@
      is effective without a click -- re-render using the stored preference,
      which may bring phone right back once the window widens again. */
   function onNarrowChange() {
+    var before = root.dataset.view || 'analyst';
     var eff = render(rawView);
-    document.dispatchEvent(new CustomEvent('demo:viewchange', { detail: { view: eff } }));
+    /* Only announce a change that happened. With analyst or executive
+       selected, crossing 40rem changes nothing — and announcing it anyway
+       made the whole dashboard fade out and back in every time a phone was
+       turned on its side. */
+    if (eff !== before) {
+      document.dispatchEvent(new CustomEvent('demo:viewchange', { detail: { view: eff } }));
+    }
   }
 
   function init() {

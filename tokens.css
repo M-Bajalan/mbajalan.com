@@ -39,6 +39,57 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* What the reader sees for the moment before Newsreader lands, sized to take
+   up the same room. Georgia is about a tenth wider than Newsreader at text
+   sizes and a sixth wider in bold, so without this the swap re-wrapped five
+   of the home page's nine paragraphs, dropped the masthead from two lines to
+   one, and moved everything below it: the page was 183px taller in the
+   fallback (measured at 390px wide), a layout shift of 0.10 on a slow
+   connection. size-adjust scales the stand-in so the lines break where the
+   real face will break them.
+
+   The ratios were measured in the browser, on this site's own text, at the
+   sizes each breakpoint actually sets — Newsreader's optical-size axis makes
+   it narrower as it gets larger, so one number cannot serve a phone's 16px
+   body and a laptop's 20px. Hence the two sets.
+
+   Where there is no local Georgia (Android), the face has no source, the
+   browser skips it, and the stack falls through to the system serif exactly
+   as before. The stand-in is only ever a stand-in. */
+@font-face {
+  font-family: "Newsreader Fallback";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Georgia");
+  size-adjust: 95%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  font-style: normal;
+  font-weight: 600;
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  size-adjust: 85.5%;
+}
+
+@media (min-width: 48rem) {
+  @font-face {
+    font-family: "Newsreader Fallback";
+    font-style: normal;
+    font-weight: 400;
+    src: local("Georgia");
+    size-adjust: 91%;
+  }
+
+  @font-face {
+    font-family: "Newsreader Fallback";
+    font-style: normal;
+    font-weight: 600;
+    src: local("Georgia Bold"), local("Georgia-Bold");
+    size-adjust: 89%;
+  }
+}
+
 :root {
   color-scheme: light dark;
 }
@@ -151,8 +202,8 @@
      personality existed only on paper. The site still calls no third party.
      The mono stack is deliberately left to the system.
      ====================================================================== */
-  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
-  --font-body:    "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --font-display: "Newsreader", "Newsreader Fallback", ui-serif, Georgia, "Times New Roman", serif;
+  --font-body:    "Newsreader", "Newsreader Fallback", ui-serif, Georgia, "Times New Roman", serif;
   --font-outlier: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --text-xs:   0.75rem;    /* 12px  */
